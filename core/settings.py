@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'users',
     'shared',
     'bemor',
+'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -122,15 +123,14 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("NAME"),
-        "USER": os.getenv("USER"),
+        "USER": 'postgres',
         "PASSWORD": os.getenv("PASSWORD"),
         "HOST": os.getenv("HOST"),
         "PORT": os.getenv("PORT"),
     }
 }
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
 
 # DATABASES = {
 #     'default': {
@@ -173,12 +173,17 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True
+}

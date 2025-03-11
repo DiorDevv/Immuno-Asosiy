@@ -1,10 +1,10 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, generics, serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer
-
 
 class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
@@ -43,7 +43,6 @@ class BemorQoshishCreateView(CreateAPIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-
 class ManzilListCreateView(generics.ListCreateAPIView):
     queryset = Manzil.objects.all()
     serializer_class = ManzilSerializer
@@ -62,7 +61,6 @@ class ManzilListCreateView(generics.ListCreateAPIView):
             )
 
         return super().create(request, *args, **kwargs)
-
 
 class OperatsiyaBolganJoyListCreateView(generics.ListCreateAPIView):
     queryset = OperatsiyaBolganJoy.objects.all()

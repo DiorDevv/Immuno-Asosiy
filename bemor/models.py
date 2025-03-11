@@ -104,3 +104,5 @@ class Bemor(BaseModel):
     class Meta:
         verbose_name = "Bemor"
         verbose_name_plural = "Bemorlar"
+
+
