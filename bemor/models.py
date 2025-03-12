@@ -52,6 +52,7 @@ class BemorningHolati(BaseModel):
         return self.holati
 
 
+
 class BemorQoshish(BaseModel):
     GENDER_CHOICES = [
         ('M', 'Male'),
