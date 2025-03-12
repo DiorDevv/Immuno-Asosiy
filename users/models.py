@@ -9,7 +9,7 @@ from shared.models import BaseModel
 
 NEW, DONE = ('new', 'done',)
 
-
+print()
 class Role(models.TextChoices):
     TTB = "TTB", "TTB"
     VSSB = "VSSB", "VSSB"

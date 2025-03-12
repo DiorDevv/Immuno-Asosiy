@@ -106,3 +106,5 @@ class Bemor(BaseModel):
         verbose_name_plural = "Bemorlar"
 
 
+class Newclass:
+    pass
