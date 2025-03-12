@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from shifokor.models import Shifokorlar
+from .models import Shifokorlar
 
 
 class ShifokorModelSerializer(ModelSerializer):
@@ -9,3 +9,4 @@ class ShifokorModelSerializer(ModelSerializer):
         fields = 'all'
 
 
+print("ds")
