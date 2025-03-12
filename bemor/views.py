@@ -76,7 +76,6 @@ class BemorningHolatiViewSet(viewsets.ModelViewSet):
 
 
 class BemorViewSet(viewsets.ModelViewSet):
-    """ Bemorlar uchun API """
     queryset = Bemor.objects.all().order_by('-created_at')  # Yangi bemorlar birinchi chiqadi
     serializer_class = BemorSerializer
     permission_classes = [IsAuthenticated]  # Faqat autentifikatsiya qilingan foydalanuvchilar foydalanishi mumkin
@@ -85,11 +84,9 @@ class BemorViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'arxivga_olingan_sana']  # Saralash uchun maydonlar
 
     def perform_create(self, serializer):
-        """ Yangi bemorni yaratishda avtomatik tekshirish va sozlash """
         serializer.save()
 
     def perform_update(self, serializer):
-        """ Bemorni yangilashda validatsiyalarni qo‘shish """
         instance = serializer.instance
         if instance.arxivga_olingan_sana and instance.arxivga_olingan_sana < instance.created_at:
             raise serializers.ValidationError({"arxivga_olingan_sana": "Arxivga olish sanasi noto‘g‘ri!"})
@@ -97,7 +94,6 @@ class BemorViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def perform_destroy(self, instance):
-        """ Bemorni o‘chirish logikasi """
         if instance.arxivga_olingan_sana:
             raise serializers.ValidationError({"detail": "Arxivga olingan bemor o‘chirib bo‘lmaydi!"})
         instance.delete()
