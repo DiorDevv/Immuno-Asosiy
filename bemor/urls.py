@@ -1,9 +1,17 @@
-from django.urls import path
-from .views import BemorQoshishCreateView, ManzilListCreateView, OperatsiyaBolganJoyListCreateView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import BemorQoshishCreateView, ManzilViewSet, OperatsiyaBolganJoyViewSet, BemorningHolatiViewSet, \
+    BemorViewSet
 
+# ViewSet-lar uchun Router yaratamiz
+router = DefaultRouter()
+router.register(r'manzil', ManzilViewSet, basename='manzil')
+router.register(r'operatsiyalar', OperatsiyaBolganJoyViewSet)
+router.register(r'bemor_holati', BemorningHolatiViewSet)
+router.register(r'bemorlar', BemorViewSet)
 urlpatterns = [
     path('bemor-qoshish/', BemorQoshishCreateView.as_view(), name='bemor-qoshish'),
-    path('manzil/', ManzilListCreateView.as_view(), name='manzil'),
-    path('operatsiya/', OperatsiyaBolganJoyListCreateView.as_view(), name='operatsiya-list-create'),
 
+    # ManzilViewSet API-lari uchun avtomatik URL-larni qo‘shamiz
+    path('', include(router.urls)),
 ]

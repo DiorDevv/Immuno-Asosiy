@@ -1,10 +1,14 @@
-from drf_spectacular.utils import extend_schema
 from rest_framework import status, generics, serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer
+from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
+    BemorningHolatiSerializer, BemorSerializer
+from rest_framework import viewsets, permissions
+
+from rest_framework import viewsets, filters
+
 
 class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
@@ -43,33 +47,57 @@ class BemorQoshishCreateView(CreateAPIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-class ManzilListCreateView(generics.ListCreateAPIView):
+
+class ManzilViewSet(viewsets.ModelViewSet):
     queryset = Manzil.objects.all()
     serializer_class = ManzilSerializer
-    permission_classes = [IsAuthenticated]  # Faqat autentifikatsiyadan o‘tgan foydalanuvchilar ishlata oladi
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Faqat kirgan user POST, PUT, DELETE qila oladi
 
-    def create(self, request, *args, **kwargs):
-        data = request.data
-        mamlakat = data.get("mamlakat")
-        hudud = data.get("hudud")
 
-        existing_manzil = Manzil.objects.filter(mamlakat=mamlakat, hudud=hudud).first()
-        if existing_manzil:
-            return Response(
-                {"message": "Bu manzil allaqachon mavjud!", "data": ManzilSerializer(existing_manzil).data},
-                status=status.HTTP_200_OK
-            )
-
-        return super().create(request, *args, **kwargs)
-
-class OperatsiyaBolganJoyListCreateView(generics.ListCreateAPIView):
+class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
     queryset = OperatsiyaBolganJoy.objects.all()
     serializer_class = OperatsiyaBolganJoySerializer
-    permission_classes = [AllowAny]  # Hamma foydalanishi mumkin
 
     def perform_create(self, serializer):
-        data = serializer.validated_data
-        if data['operatsiya_oxirlangan_sana'] < data['transplantatsiya_sana']:
+        # Qo‘shimcha tekshiruv: operatsiya sanasi tugash sanasidan oldin bo‘lishi kerak
+        transplantatsiya_sana = serializer.validated_data.get('transplantatsiya_sana')
+        operatsiya_oxirlangan_sana = serializer.validated_data.get('operatsiya_oxirlangan_sana')
+
+        if transplantatsiya_sana > operatsiya_oxirlangan_sana:
             raise serializers.ValidationError(
-                "Operatsiya tugash sanasi transplantatsiya sanasidan oldin bo'lishi mumkin emas.")
+                "Transplantatsiya sanasi operatsiya tugash sanasidan oldin bo‘lishi kerak!")
+
         serializer.save()
+
+
+class BemorningHolatiViewSet(viewsets.ModelViewSet):
+    queryset = BemorningHolati.objects.all()
+    serializer_class = BemorningHolatiSerializer
+
+
+class BemorViewSet(viewsets.ModelViewSet):
+    """ Bemorlar uchun API """
+    queryset = Bemor.objects.all().order_by('-created_at')  # Yangi bemorlar birinchi chiqadi
+    serializer_class = BemorSerializer
+    permission_classes = [IsAuthenticated]  # Faqat autentifikatsiya qilingan foydalanuvchilar foydalanishi mumkin
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']  # Ism, familiya va JSHSHIR bo‘yicha qidirish
+    ordering_fields = ['created_at', 'arxivga_olingan_sana']  # Saralash uchun maydonlar
+
+    def perform_create(self, serializer):
+        """ Yangi bemorni yaratishda avtomatik tekshirish va sozlash """
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """ Bemorni yangilashda validatsiyalarni qo‘shish """
+        instance = serializer.instance
+        if instance.arxivga_olingan_sana and instance.arxivga_olingan_sana < instance.created_at:
+            raise serializers.ValidationError({"arxivga_olingan_sana": "Arxivga olish sanasi noto‘g‘ri!"})
+
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """ Bemorni o‘chirish logikasi """
+        if instance.arxivga_olingan_sana:
+            raise serializers.ValidationError({"detail": "Arxivga olingan bemor o‘chirib bo‘lmaydi!"})
+        instance.delete()

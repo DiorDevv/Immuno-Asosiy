@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from drf_spectacular.utils import extend_schema
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework import generics, permissions

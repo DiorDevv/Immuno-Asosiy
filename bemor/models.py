@@ -52,7 +52,7 @@ class BemorningHolati(BaseModel):
         return self.holati
 
 
-class BemorQoshish(models.Model):
+class BemorQoshish(BaseModel):
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
@@ -85,26 +85,25 @@ class BemorQoshish(models.Model):
 
 
 class Bemor(BaseModel):
-    bemor = models.ForeignKey(BemorQoshish, on_delete=models.CASCADE)
+    bemor = models.OneToOneField(BemorQoshish, on_delete=models.CASCADE)
     manzil = models.ForeignKey(Manzil, on_delete=models.SET_NULL, null=True, blank=True)
     bemor_holati = models.ForeignKey(BemorningHolati, on_delete=models.CASCADE, null=True, blank=True)
     operatsiya_bolgan_joy = models.ForeignKey(OperatsiyaBolganJoy, on_delete=models.CASCADE, null=True, blank=True)
-    biriktirilgan_file = models.FileField(upload_to='media/biriktirilgan/%Y/%m/%d', null=True, blank=True)
+    biriktirilgan_file = models.FileField(upload_to='biriktirilgan/%Y/%m/%d', null=True, blank=True)
     qoshimcha_malumotlar = models.TextField(null=True, blank=True)
     arxivga_olingan_sana = models.DateTimeField(null=True, blank=True)
 
-    # def clean(self):
-    #     if not self.bemor.JSHSHIR:
-    #         raise ValidationError("Bemor qo‘shish uchun JSHSHIR mavjud bo‘lishi kerak!")
-    #
-    # def save(self, *args, **kwargs):
-    #     self.clean()  # Validatsiyani ishga tushiramiz
-    #     super().save(*args, **kwargs)
+    def clean(self):
+        if self.arxivga_olingan_sana and self.arxivga_olingan_sana > self.created_at:
+            raise ValidationError("Arxivga olish sanasi noto‘g‘ri!")
+
+    def save(self, *args, **kwargs):
+        self.clean()  # Validatsiyani chaqirish
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Bemor"
         verbose_name_plural = "Bemorlar"
 
-
-class Newclass:
-    pass
+    def __str__(self):
+        return f"{self.bemor.ism} {self.bemor.familiya} - {self.bemor.JSHSHIR}"
