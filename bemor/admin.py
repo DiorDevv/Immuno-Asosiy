@@ -1,6 +1,6 @@
 from django.contrib import admin
 from import_export.admin import ExportMixin
-from .models import Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, BemorQoshish
+from .models import Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, BemorQoshish, Viloyat, Tuman, Manzil
 
 
 class BemorInline(admin.TabularInline):  # Bemorlarni boshqa adminlarda ichki jadval sifatida ko‘rsatish
@@ -9,13 +9,34 @@ class BemorInline(admin.TabularInline):  # Bemorlarni boshqa adminlarda ichki ja
     autocomplete_fields = ['jinsi', 'manzil', 'bemor_holati']
 
 
+@admin.register(Viloyat)
+class ViloyatAdmin(admin.ModelAdmin):
+    list_display = ('nomi',)
+    search_fields = ('nomi',)
+
+
+@admin.register(Tuman)
+class TumanAdmin(admin.ModelAdmin):
+    list_display = ('nomi', 'viloyat', 'tuman_tibbiyot_birlashmasi')
+    search_fields = ('nomi', 'tuman_tibbiyot_birlashmasi')
+    list_filter = ('viloyat',)
+
+
 @admin.register(Manzil)
-class ManzilAdmin(ExportMixin, admin.ModelAdmin):  # Export funksiyasi qo‘shildi
-    list_display = ('mamlakat', 'hudud', 'tuman', 'mahalla', 'kocha_nomi', 'biriktirilgan_tuman')
-    search_fields = ('mamlakat', 'hudud', 'tuman', 'mahalla')
-    list_filter = ('mamlakat', 'hudud', 'tuman')
-    ordering = ('mamlakat', 'hudud', 'tuman')
-    list_per_page = 20
+class ManzilAdmin(admin.ModelAdmin):
+    list_display = ('mamlakat', 'viloyat', 'tuman', 'tuman_tibbiyot_birlashmasi', 'mahalla', 'kocha_nomi')
+    search_fields = ('mahalla', 'kocha_nomi')
+    list_filter = ('viloyat', 'tuman', 'tuman_tibbiyot_birlashmasi')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """
+        """
+        if db_field.name == "tuman":
+            if "viloyat" in request.GET:
+                kwargs["queryset"] = Tuman.objects.filter(viloyat_id=request.GET["viloyat"])
+            else:
+                kwargs["queryset"] = Tuman.objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(OperatsiyaBolganJoy)
@@ -40,7 +61,7 @@ class BemorningHolatiAdmin(ExportMixin, admin.ModelAdmin):
 
 @admin.register(BemorQoshish)
 class BemorQoshsihAdmin(admin.ModelAdmin):
-    list_display = ("id","JSHSHIR", "ism", "familiya", "tugilgan_sana", "jinsi")
+    list_display = ("id", "JSHSHIR", "ism", "familiya", "tugilgan_sana", "jinsi")
     search_fields = ("JSHSHIR", "ism", "familiya")
     list_filter = ("jinsi", "tugilgan_sana")
     date_hierarchy = "tugilgan_sana"
