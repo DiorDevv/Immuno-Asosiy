@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 import uuid
 
+
 User = get_user_model()
 
 
@@ -103,7 +104,7 @@ class Bemor(BaseModel):
 
     class Meta:
         verbose_name = "Bemor"
-        verbose_name_plural = "Bemorlar"
+        verbose_name_plural ="Bemorlar"
 
 
 class Newclass:

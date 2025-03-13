@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ExportMixin
 from .models import Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, BemorQoshish
-
+from django.utils.translation import gettext_lazy as _
 
 class BemorInline(admin.TabularInline):  # Bemorlarni boshqa adminlarda ichki jadval sifatida ko‘rsatish
     model = Bemor

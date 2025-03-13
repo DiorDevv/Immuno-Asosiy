@@ -4,17 +4,14 @@ from dotenv import load_dotenv
 import os
 from datetime import timedelta
 
+
 load_dotenv()
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
@@ -37,7 +34,7 @@ INSTALLED_APPS = [
     'users',
     'shared',
     'bemor',
-'drf_spectacular',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -130,8 +127,6 @@ DATABASES = {
     }
 }
 
-
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -159,13 +154,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Asosiy backend
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'uz'
 
 TIME_ZONE = 'UTC'
 
@@ -173,10 +166,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 STATIC_URL = 'static/'
-
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -187,3 +177,28 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True
 }
+
+# PARLER_DEFAULT_LANGUAGE_CODE = 'uz'
+#
+# PARLER_LANGUAGES = {
+#     None: (
+#         {'code': 'uz', },
+#         {'code': 'uz-cyrl', },
+#         {'code': 'ru', },
+#     ),
+#     'default': {
+#         'fallbacks': ['en'],
+#         'hide_untranslated': False,
+#     }
+# }
+#
+# USE_L10N = True
+# LANGUAGES = [
+#     ('uz', _("Uzbek (Latin)")),
+#     ('uz-cyrl', _("Uzbek (Cyrillic)")),
+#     ('ru', _("Russian")),
+# ]
+#
+# LOCALE_PATHS = [
+#     os.path.join(BASE_DIR, 'locale')
+# ]
