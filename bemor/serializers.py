@@ -1,8 +1,22 @@
 from rest_framework import serializers
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman
 import re
 from django.utils import timezone
 import os
+
+
+class ViloyatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Viloyat
+        fields = "__all__"
+
+
+class TumanSerializer(serializers.ModelSerializer):
+    viloyat_nomi = serializers.CharField(source="viloyat.nomi", read_only=True)
+
+    class Meta:
+        model = Tuman
+        fields = ["id", "nomi", "viloyat", "viloyat_nomi", "tuman_tibbiyot_birlashmasi"]
 
 
 class BemorQoshishSerializer(serializers.ModelSerializer):
@@ -112,7 +126,6 @@ class BemorSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        """ Majburiy maydonlar tekshiruvi """
         errors = {}
 
         if not data.get('bemor'):

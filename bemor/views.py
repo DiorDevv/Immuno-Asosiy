@@ -1,12 +1,12 @@
 from rest_framework import status, generics, serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
     BemorningHolatiSerializer, BemorSerializer
 from rest_framework import viewsets, permissions
-
+from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework import viewsets, filters
 
 
@@ -68,13 +68,6 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
                 "Transplantatsiya sanasi operatsiya tugash sanasidan oldin bo‘lishi kerak!")
 
         serializer.save()
-
-
-class BemorningHolatiViewSet(viewsets.ModelViewSet):
-    queryset = BemorningHolati.objects.all()
-    serializer_class = BemorningHolatiSerializer
-
-
 class BemorViewSet(viewsets.ModelViewSet):
     queryset = Bemor.objects.all().order_by('-created_at')  # Yangi bemorlar birinchi chiqadi
     serializer_class = BemorSerializer
