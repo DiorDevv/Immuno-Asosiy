@@ -1,9 +1,7 @@
-from django.db import models
 from django.contrib.auth import get_user_model
 from shared.models import BaseModel
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
-import uuid
 
 User = get_user_model()
 from django.db import models
