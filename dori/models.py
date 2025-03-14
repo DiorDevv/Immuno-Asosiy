@@ -20,7 +20,7 @@ class Dori(BaseModel):
 
     def __str__(self):
         return self.nomi
-
+print()
 class DoriQabulQilish(BaseModel):
     murojaat_sababi = TextField()
     berilgan_sana = DateField()
