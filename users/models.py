@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
-import random
 from django.contrib.auth.hashers import identify_hasher
 from django.utils.crypto import get_random_string
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,7 +8,6 @@ from shared.models import BaseModel
 
 NEW, DONE = ('new', 'done',)
 
-print()
 class Role(models.TextChoices):
     TTB = "TTB", "TTB"
     VSSB = "VSSB", "VSSB"

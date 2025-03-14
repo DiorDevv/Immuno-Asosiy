@@ -94,7 +94,6 @@ class BemorningHolatiSerializer(serializers.ModelSerializer):
 
 
 class BemorSerializer(serializers.ModelSerializer):
-    """ Bemor obyektlari uchun serializer """
     bemor = BemorQoshishSerializer()  # ID o‘rniga to‘liq obyekt
     manzil = ManzilSerializer()
     bemor_holati = BemorningHolatiSerializer()
@@ -105,7 +104,6 @@ class BemorSerializer(serializers.ModelSerializer):
         fields = '__all__'  # Hammasini olish
 
     def validate_arxivga_olingan_sana(self, value):
-        """ Arxivga olingan sana validatsiyasi """
         if value and value > timezone.now():
             raise serializers.ValidationError("Arxivga olish sanasi kelajakdagi sana bo‘lishi mumkin emas!")
         if value and self.instance and value < self.instance.created_at:
@@ -114,7 +112,6 @@ class BemorSerializer(serializers.ModelSerializer):
         return value
 
     def validate_biriktirilgan_file(self, value):
-        """ Fayl formatini tekshirish """
         if value:
             ext = os.path.splitext(value.name)[1].lower()
             allowed_extensions = ['.pdf', '.jpg', '.jpeg', '.png']
