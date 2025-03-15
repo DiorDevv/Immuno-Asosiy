@@ -1,8 +1,12 @@
 from rest_framework import serializers
+from rest_framework.permissions import IsAuthenticated
+
 from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman
 import re
 from django.utils import timezone
 import os
+
+from .permissions import BemorPermission
 
 
 class ViloyatSerializer(serializers.ModelSerializer):
@@ -91,19 +95,21 @@ class BemorningHolatiSerializer(serializers.ModelSerializer):
     class Meta:
         model = BemorningHolati
         fields = '__all__'
+from .models import Bemor, Manzil, BemorningHolati, OperatsiyaBolganJoy
 
 
 class BemorSerializer(serializers.ModelSerializer):
-    bemor = BemorQoshishSerializer()  # ID o‘rniga to‘liq obyekt
-    manzil = ManzilSerializer()
-    bemor_holati = BemorningHolatiSerializer()
-    operatsiya_bolgan_joy = OperatsiyaBolganJoySerializer()
+    bemor = serializers.PrimaryKeyRelatedField(queryset=BemorQoshish.objects.all())
+    manzil = serializers.PrimaryKeyRelatedField(queryset=Manzil.objects.all())
+    bemor_holati = serializers.PrimaryKeyRelatedField(queryset=BemorningHolati.objects.all())
+    operatsiya_bolgan_joy = serializers.PrimaryKeyRelatedField(queryset=OperatsiyaBolganJoy.objects.all())
 
     class Meta:
         model = Bemor
-        fields = '__all__'  # Hammasini olish
+        fields = '__all__'
 
     def validate_arxivga_olingan_sana(self, value):
+        """Arxivga olish sanasi tekshiriladi"""
         if value and value > timezone.now():
             raise serializers.ValidationError("Arxivga olish sanasi kelajakdagi sana bo‘lishi mumkin emas!")
         if value and self.instance and value < self.instance.created_at:
@@ -112,6 +118,7 @@ class BemorSerializer(serializers.ModelSerializer):
         return value
 
     def validate_biriktirilgan_file(self, value):
+        """Yuborilgan fayl formati va hajmi tekshiriladi"""
         if value:
             ext = os.path.splitext(value.name)[1].lower()
             allowed_extensions = ['.pdf', '.jpg', '.jpeg', '.png']
@@ -123,6 +130,7 @@ class BemorSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
+        """Umumiy tekshiruvlar"""
         errors = {}
 
         if not data.get('bemor'):

@@ -13,6 +13,7 @@ class Role(models.TextChoices):
     VSSB = "VSSB", "VSSB"
     BOSH_M = "Bosh_M", "Bosh M"
     VAZIR = "Vazir", "Vazir"
+    VRACH = "VRACH", "VRACH"
 
 
 class User(AbstractUser, BaseModel):

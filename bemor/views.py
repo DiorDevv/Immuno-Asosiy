@@ -68,6 +68,7 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
                 "Transplantatsiya sanasi operatsiya tugash sanasidan oldin bo‘lishi kerak!")
 
         serializer.save()
+
 class BemorViewSet(viewsets.ModelViewSet):
     queryset = Bemor.objects.all().order_by('-created_at')  # Yangi bemorlar birinchi chiqadi
     serializer_class = BemorSerializer
