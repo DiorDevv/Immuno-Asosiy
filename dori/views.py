@@ -1,35 +1,89 @@
-from rest_framework.generics import ListAPIView
-from rest_framework.views import APIView
+# views.py
+from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from bemor.models import Bemor
-from bemor.serializers import BemorSerializer
-from dori.models import Dori
-from .serializers import PatientSerializer, MedicineSerializer
+from bemor.models import Bemor  # Assuming this exists
+from dori.models import Dori, DoriQabulQilish, DoriQabulYakun
+from .serializers import (
+    PatientSerializer,
+    MedicineSerializer,
+    DoriQabulQilishSerializer,
+    DoriQabulYakunSerializer
+)
 
-class PatientListView(APIView):
-    def get(self, request):
-        patients = Bemor.objects.all()
-        serializer = PatientSerializer(patients, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# Patient (Bemor) Views
+class PatientListCreateView(ListAPIView, CreateAPIView):
+    queryset = Bemor.objects.all()
+    serializer_class = PatientSerializer
 
-class PatientDetailView(APIView):
-    def get(self, request, pk):
-        patient = get_object_or_404(Bemor, pk=pk)
-        serializer = PatientSerializer(patient)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class PatientMedicineListView(APIView):
-    def get(self, request, pk):
-        patient = get_object_or_404(Bemor, pk=pk)
-        medicines = patient.medicines.all()
-        serializer = MedicineSerializer(medicines, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class PatientUpdateDestroyView(UpdateAPIView, DestroyAPIView):
+    queryset = Bemor.objects.all()
+    serializer_class = PatientSerializer
+    lookup_field = 'pk'
 
+# Medicine (Dori) Views
+class MedicineListCreateView(ListAPIView, CreateAPIView):
+    queryset = Dori.objects.all()
+    serializer_class = MedicineSerializer
 
-class BemorDoriQabulAPIView(APIView):
-    def get(self, request, bemor_id):
-        bemor = get_object_or_404(Bemor, id=bemor_id)
-        serializer = BemorSerializer(bemor)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class MedicineUpdateDestroyView(UpdateAPIView, DestroyAPIView):
+    queryset = Dori.objects.all()
+    serializer_class = MedicineSerializer
+    lookup_field = 'pk'
+
+# DoriQabulQilish Views
+class DoriQabulQilishListCreateView(ListAPIView, CreateAPIView):
+    queryset = DoriQabulQilish.objects.all()
+    serializer_class = DoriQabulQilishSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DoriQabulQilishUpdateDestroyView(UpdateAPIView, DestroyAPIView):
+    queryset = DoriQabulQilish.objects.all()
+    serializer_class = DoriQabulQilishSerializer
+    lookup_field = 'pk'
+
+# DoriQabulYakun Views
+class DoriQabulYakunListCreateView(ListAPIView, CreateAPIView):
+    queryset = DoriQabulYakun.objects.all()
+    serializer_class = DoriQabulYakunSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DoriQabulYakunUpdateDestroyView(UpdateAPIView, DestroyAPIView):
+    queryset = DoriQabulYakun.objects.all()
+    serializer_class = DoriQabulYakunSerializer
+    lookup_field = 'pk'
+
+# Additional View for Patient-Specific Medicines (assuming relationship exists)
+class PatientMedicineListView(ListAPIView):
+    serializer_class = MedicineSerializer
+
+    def get_queryset(self):
+        patient_id = self.kwargs['pk']
+        return Dori.objects.filter(patients__id=patient_id)  # Assumes ManyToMany relationship
