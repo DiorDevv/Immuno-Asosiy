@@ -71,7 +71,7 @@ class BemorQoshsihAdmin(admin.ModelAdmin):
 
 @admin.register(Bemor)
 class BemorAdmin(ExportMixin, admin.ModelAdmin):
-    list_display = ("bemor", "manzil", "bemor_holati", "operatsiya_bolgan_joy", "arxivga_olingan_sana")
+    list_display = ('id',"bemor", "manzil", "bemor_holati", "operatsiya_bolgan_joy", "arxivga_olingan_sana")
     search_fields = ("bemor__JSHSHIR", "bemor__ism", "bemor__familiya")
     list_filter = ("bemor__jinsi", "bemor_holati", "arxivga_olingan_sana")
     date_hierarchy = "arxivga_olingan_sana"
