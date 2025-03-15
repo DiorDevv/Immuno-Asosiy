@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'shared',
     'bemor',
     'drf_spectacular',
+    'dori'
 ]
 
 MIDDLEWARE = [
