@@ -50,6 +50,7 @@ class MedicineUpdateDestroyView(UpdateAPIView, DestroyAPIView):
     serializer_class = MedicineSerializer
     lookup_field = 'pk'
 
+
 # DoriQabulQilish Views
 class DoriQabulQilishListCreateView(ListAPIView, CreateAPIView):
     queryset = DoriQabulQilish.objects.all()
