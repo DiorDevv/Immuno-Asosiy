@@ -8,6 +8,7 @@ from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBol
 from rest_framework import viewsets, permissions
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework import viewsets, filters
+from rest_framework.exceptions import ValidationError
 
 
 class BemorQoshishCreateView(CreateAPIView):
@@ -70,25 +71,44 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
 
         serializer.save()
 
+
 class BemorViewSet(viewsets.ModelViewSet):
-    queryset = Bemor.objects.all().order_by('-created_at')  # Yangi bemorlar birinchi chiqadi
+    queryset = Bemor.objects.all().order_by('-created_at')
     serializer_class = BemorSerializer
-    permission_classes = []  # Faqat autentifikatsiya qilingan foydalanuvchilar foydalanishi mumkin
+    permission_classes = []
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']  # Ism, familiya va JSHSHIR bo‘yicha qidirish
-    ordering_fields = ['created_at', 'arxivga_olingan_sana']  # Saralash uchun maydonlar
+    search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']
+    ordering_fields = ['created_at', 'arxivga_olingan_sana']
 
-    def perform_create(self, serializer):
-        serializer.save()
+    def create(self, request, *args, **kwargs):
+        """Agar bemor allaqachon bazada bo‘lsa, yangi yaratmaydi, balki mavjud bemorni qaytaradi"""
+        try:
+            bemor_id = request.data.get("bemor")
 
-    def perform_update(self, serializer):
-        instance = serializer.instance
-        if instance.arxivga_olingan_sana and instance.arxivga_olingan_sana < instance.created_at:
-            raise serializers.ValidationError({"arxivga_olingan_sana": "Arxivga olish sanasi noto‘g‘ri!"})
+            if not bemor_id:
+                raise ValidationError({"error": "Bemor ID kiritilishi shart!"})
 
-        serializer.save()
+            # Bemor mavjudligini tekshirish
+            if not Bemor.objects.filter(id=bemor_id).exists():
+                return Response(
+                    {"error": "Bunday bemor mavjud emas!"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-    def perform_destroy(self, instance):
-        if instance.arxivga_olingan_sana:
-            raise serializers.ValidationError({"detail": "Arxivga olingan bemor o‘chirib bo‘lmaydi!"})
-        instance.delete()
+            # Agar bemor allaqachon ro‘yxatda bo‘lsa, qaytaramiz
+            existing_bemor = Bemor.objects.filter(bemor=bemor_id, manzil=request.data.get("manzil")).first()
+            if existing_bemor:
+                return Response(
+                    {
+                        "message": "Bu bemor allaqachon ro‘yxatda bor!",
+                        "bemor": BemorSerializer(existing_bemor).data
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            return super().create(request, *args, **kwargs)
+
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Server xatosi: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
