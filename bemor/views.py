@@ -13,6 +13,7 @@ from rest_framework import viewsets, filters
 class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
     serializer_class = BemorQoshishSerializer
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -72,7 +73,7 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
 class BemorViewSet(viewsets.ModelViewSet):
     queryset = Bemor.objects.all().order_by('-created_at')  # Yangi bemorlar birinchi chiqadi
     serializer_class = BemorSerializer
-    permission_classes = [IsAuthenticated]  # Faqat autentifikatsiya qilingan foydalanuvchilar foydalanishi mumkin
+    permission_classes = []  # Faqat autentifikatsiya qilingan foydalanuvchilar foydalanishi mumkin
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']  # Ism, familiya va JSHSHIR bo‘yicha qidirish
     ordering_fields = ['created_at', 'arxivga_olingan_sana']  # Saralash uchun maydonlar
