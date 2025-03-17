@@ -105,6 +105,13 @@ class BemorQoshish(BaseModel):
         return f"{self.ism} {self.familiya} - {self.JSHSHIR}"
 
 
+class ArxivSababi(models.Model):
+    nomi = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.nomi
+
+
 class Bemor(BaseModel):
     bemor = models.OneToOneField(BemorQoshish, on_delete=models.CASCADE)
     manzil = models.ForeignKey(Manzil, on_delete=models.SET_NULL, null=True, blank=True)
@@ -112,14 +119,23 @@ class Bemor(BaseModel):
     operatsiya_bolgan_joy = models.ForeignKey(OperatsiyaBolganJoy, on_delete=models.CASCADE, null=True, blank=True)
     biriktirilgan_file = models.FileField(upload_to='media/biriktirilgan/%Y/%m/%d', null=True, blank=True)
     qoshimcha_malumotlar = models.TextField(null=True, blank=True)
+
     arxivga_olingan_sana = models.DateTimeField(null=True, blank=True)
+    arxiv_sababi = models.ForeignKey(ArxivSababi, on_delete=models.SET_NULL, null=True, blank=True)
+    arxiv_izoh = models.TextField(null=True, blank=True)
 
     def clean(self):
-        if self.arxivga_olingan_sana and self.arxivga_olingan_sana > self.created_at:
-            raise ValidationError("Arxivga olish sanasi noto‘g‘ri!")
+        """ Arxivga olish sanasi noto‘g‘ri kiritilganligini tekshirish """
+        if self.arxivga_olingan_sana:
+            if not self.created_at or self.arxivga_olingan_sana < self.created_at:
+                raise ValidationError("Arxivga olish sanasi noto‘g‘ri!")
 
     def save(self, *args, **kwargs):
-        self.clean()  # Validatsiyani chaqirish
+        """ Agar bemor arxivga o'tkazilsa, sabab va izoh kiritilganligini tekshirish """
+        if self.arxivga_olingan_sana:
+            if not self.arxiv_sababi:
+                raise ValidationError("Arxivga o'tkazish sababini tanlash kerak!")
+            self.bemor_holati = BemorningHolati.objects.get_or_create(nomi="Arxivda")[0]
         super().save(*args, **kwargs)
 
     class Meta:
