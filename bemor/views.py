@@ -66,6 +66,7 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
     queryset = OperatsiyaBolganJoy.objects.all()
     serializer_class = OperatsiyaBolganJoySerializer
 
+
     def perform_create(self, serializer):
         # Qo‘shimcha tekshiruv: operatsiya sanasi tugash sanasidan oldin bo‘lishi kerak
         transplantatsiya_sana = serializer.validated_data.get('transplantatsiya_sana')
