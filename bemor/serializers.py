@@ -5,7 +5,6 @@ from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, 
 import re
 from django.utils import timezone
 import os
-
 from .permissions import BemorPermission
 
 
@@ -95,7 +94,6 @@ class BemorningHolatiSerializer(serializers.ModelSerializer):
     class Meta:
         model = BemorningHolati
         fields = '__all__'
-from .models import Bemor, Manzil, BemorningHolati, OperatsiyaBolganJoy
 
 
 class BemorSerializer(serializers.ModelSerializer):
@@ -109,7 +107,6 @@ class BemorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_arxivga_olingan_sana(self, value):
-        """Arxivga olish sanasi tekshiriladi"""
         if value and value > timezone.now():
             raise serializers.ValidationError("Arxivga olish sanasi kelajakdagi sana bo‘lishi mumkin emas!")
         if value and self.instance and value < self.instance.created_at:
@@ -118,7 +115,6 @@ class BemorSerializer(serializers.ModelSerializer):
         return value
 
     def validate_biriktirilgan_file(self, value):
-        """Yuborilgan fayl formati va hajmi tekshiriladi"""
         if value:
             ext = os.path.splitext(value.name)[1].lower()
             allowed_extensions = ['.pdf', '.jpg', '.jpeg', '.png']
@@ -130,7 +126,6 @@ class BemorSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        """Umumiy tekshiruvlar"""
         errors = {}
 
         if not data.get('bemor'):
