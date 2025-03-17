@@ -32,12 +32,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'import_export',
+    'drf_yasg',
 
     #    app
     'users',
     'shared',
     'bemor',
-    'drf_spectacular',
+    'shifokor',
+
 ]
 
 MIDDLEWARE = [
@@ -178,10 +180,4 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True
-}
+
