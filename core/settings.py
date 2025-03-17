@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'bemor',
     'drf_spectacular',
     'dori',
+    'shifokor',
 ]
 
 MIDDLEWARE = [
