@@ -1,99 +1,122 @@
-# serializers.py
+from django.db.models import Sum
 from rest_framework import serializers
-from bemor.models import Bemor  # Assuming this exists
-from dori.models import Dori, DoriQabulQilish, DoriQabulYakun, DoriTuri
+from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, PrescribedMedication, \
+    MedicationPrescription
 
 
-# First, let's create a serializer for DoriTuri
-class DoriTuriSerializer(serializers.ModelSerializer):
+class MedicationTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DoriTuri
-        fields = ['id', 'dori_dori']
+        model = MedicationType
+        fields = ['id', 'name']
 
 
-# Serializer for Dori (Medicine)
-class MedicineSerializer(serializers.ModelSerializer):
-    # Adding DoriTuri as a nested serializer if there's a relationship
-    dori_turi = DoriTuriSerializer(read_only=True, required=False)
+class MedicationDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicationDetails
+        fields = ['id', 'description', 'usage_instructions', 'side_effects',
+                  'contraindications', 'storage_instructions']
+
+
+
+
+class InventoryTransactionSerializer(serializers.ModelSerializer):
+    medication_name = serializers.CharField(source='medication.name', read_only=True)
+    medication_type = serializers.CharField(source='medication.type.name', read_only=True)
+    transaction_type_display = serializers.CharField(source='get_transaction_type_display', read_only=True)
+    patient_name = serializers.CharField(source='patient.full_name', read_only=True)
 
     class Meta:
-        model = Dori
-        fields = [
-            'id',
-            'nomi',
-            'dozasi',
-            'chiqarilgan_sana',
-            'yaroqlilik_muddati',
-            'fayl_turi',
-            'seria_raqam',
-            'dori_turi',  # Assuming a relationship might exist
-            'created_at',  # From BaseModel
-            'updated_at',  # From BaseModel
-        ]
-        read_only_fields = ['created_at', 'updated_at']
+        model = InventoryTransaction
+        fields = ['id', 'medication', 'medication_name', 'medication_type',
+                  'transaction_type', 'transaction_type_display',
+                  'quantity', 'date', 'notes', 'archived',
+                  'patient', 'patient_name']
 
 
-# Serializer for DoriQabulQilish
-class DoriQabulQilishSerializer(serializers.ModelSerializer):
+class MedicationSerializer(serializers.ModelSerializer):
+    total_input = serializers.IntegerField(read_only=True)
+    total_output = serializers.IntegerField(read_only=True)
+    balance = serializers.IntegerField(read_only=True)
+    type_name = serializers.CharField(source='type.name', read_only=True)
+    details = MedicationDetailsSerializer(read_only=True)
+
     class Meta:
-        model = DoriQabulQilish
-        fields = [
-            'id',
-            'murojaat_sababi',
-            'berilgan_sana',
-            'davolash_turi',
-            'muassasa_nomi',
-            'created_at',
-            'updated_at',
-        ]
-        read_only_fields = ['created_at', 'updated_at']
+        model = Medication
+        fields = ['id', 'name', 'type', 'type_name', 'dosage', 'dosage_unit',
+                  'total_input', 'total_output', 'balance', 'warehouse_quantity',
+                  'details']
 
 
-# Serializer for DoriQabulYakun
-class DoriQabulYakunSerializer(serializers.ModelSerializer):
-    # Adding bemor as a nested relationship
-    bemor = serializers.PrimaryKeyRelatedField(
-        queryset=Bemor.objects.all(),
-        many=True
+class MedicationDetailSerializer(MedicationSerializer):
+    inventory_transactions = InventoryTransactionSerializer(many=True, read_only=True)
+
+    class Meta(MedicationSerializer.Meta):
+        fields = MedicationSerializer.Meta.fields + ['inventory_transactions']
+
+class MedicationSerializer(serializers.ModelSerializer):
+    # total_input=serializers.SerializerMethodField()
+    # total_output=serializers.SerializerMethodField()
+    # balance=serializers.SerializerMethodField()
+    class Meta:
+        model = Medication
+        # fields = ['id', 'name', 'dosage_unit', "total_input", "total_output", "balance"]
+        fields = ['id', 'name', 'dosage_unit', "total_input", "total_output", "balance", "warehouse_quantity"]
+        # Adjust fields based on your Medication model
+
+    # def get_total_input(self, obj):
+    #     return InventoryTransaction.objects.filter(transaction_type="INPUT", medication=obj).aggregate(Sum("quantity"))["quantity__sum"]
+    #
+    # def get_total_output(self, obj):
+    #     return InventoryTransaction.objects.filter(transaction_type="OUTPUT", medication=obj).aggregate(Sum("quantity"))["quantity__sum"]
+    #
+    # def get_balance(self, obj):
+    #     return obj.total_input-obj.total_output
+
+
+class PrescribedMedicationSerializer(serializers.ModelSerializer):
+    medication = MedicationSerializer(read_only=True)  # Nested serializer for medication details
+    medication_id = serializers.PrimaryKeyRelatedField(
+        queryset=Medication.objects.all(),
+        write_only=True,
+        source='medication'
     )
 
     class Meta:
-        model = DoriQabulYakun
+        model = PrescribedMedication
         fields = [
-            'id',
-            'qabul_qilish_sanasi',
-            'muddati',
-            'oxirgi_qabul_sanasi',
-            'bemor',
+            'id', 'prescription', 'medication', 'medication_id', 'daily_dose',
+            'quantity', 'serial_number', 'administration_period', 'start_date',
+            'end_date', 'intake_instructions', 'is_active'
         ]
+        read_only_fields = ['is_active']  # Calculated property
 
-
-# Assuming a Bemor model exists, here's a serializer for it
-class PatientSerializer(serializers.ModelSerializer):
-    # Nested relationships
-    medicines = MedicineSerializer(many=True, read_only=True)
-    dori_qabul_yakun = DoriQabulYakunSerializer(many=True, read_only=True)
+class MedicationPrescriptionSerializer(serializers.ModelSerializer):
+    medications = PrescribedMedicationSerializer(many=True, read_only=True)  # Nested medications
+    patient = serializers.StringRelatedField()  # Display patient full_name
 
     class Meta:
-        # Assuming these fields exist in Bemor model
-        model = Bemor
+        model = MedicationPrescription
         fields = [
-            'id',
-            'medicines',  # Assuming ManyToMany with Dori
-            'dori_qabul_yakun',  # From the ManyToMany in DoriQabulYakun
-            # Add other Bemor fields here as needed
-            'created_at',
-            'updated_at',
+            'id', 'patient', 'prescription_date', 'prescription_number',
+            'institution', 'doctor', 'reason', 'is_active', 'medications'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['medications']  # Medications are managed separately
 
     def create(self, validated_data):
-        # Custom create method if needed
-        return Bemor.objects.create(**validated_data)
+        # Handle creation of prescription and link to patient
+        medications_data = self.context.get('request').data.get('medications', [])
+        prescription = MedicationPrescription.objects.create(**validated_data)
+        for med_data in medications_data:
+            PrescribedMedication.objects.create(prescription=prescription, **med_data)
+        return prescription
 
     def update(self, instance, validated_data):
-        # Custom update method if needed
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        # Update prescription details
+        instance.prescription_date = validated_data.get('prescription_date', instance.prescription_date)
+        instance.prescription_number = validated_data.get('prescription_number', instance.prescription_number)
+        instance.institution = validated_data.get('institution', instance.institution)
+        instance.doctor = validated_data.get('doctor', instance.doctor)
+        instance.reason = validated_data.get('reason', instance.reason)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.save()
         return instance
