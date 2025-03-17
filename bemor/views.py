@@ -1,3 +1,5 @@
+from datetime import date
+import openpyxl
 from rest_framework import status, generics, serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
@@ -9,6 +11,10 @@ from rest_framework import viewsets, permissions
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework import viewsets, filters
 from rest_framework.exceptions import ValidationError
+from openpyxl.styles import Alignment
+# import csv
+from django.http import HttpResponse
+from django.views import View
 
 
 class BemorQoshishCreateView(CreateAPIView):
@@ -81,7 +87,6 @@ class BemorViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'arxivga_olingan_sana']
 
     def create(self, request, *args, **kwargs):
-        """Agar bemor allaqachon bazada bo‘lsa, yangi yaratmaydi, balki mavjud bemorni qaytaradi"""
         try:
             bemor_id = request.data.get("bemor")
 
@@ -112,3 +117,61 @@ class BemorViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": f"Server xatosi: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ExportBemorExcelView(View):
+
+    def get(self, request, *args, **kwargs):
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Bemorlar"
+
+        headers = [
+            "JSHSHIR", "Ism", "Familiya", "Tug‘ilgan sana", "Yosh", "Jins", "Manzil",
+            "Bemor holati", "Operatsiya joyi", "Qo‘shimcha ma'lumotlar", "Arxivga olingan sana"
+        ]
+        ws.append(headers)
+
+        # Ustunlar kengaytiradi
+        for col_num, column_title in enumerate(headers, 1):
+            ws.cell(row=1, column=col_num, value=column_title).alignment = Alignment(horizontal="center")
+
+        # values_list malumotni tez oladi
+        bemorlar = Bemor.objects.values_list(
+            "bemor__JSHSHIR", "bemor__ism", "bemor__familiya", "bemor__tugilgan_sana", "bemor__jinsi",
+            "manzil__viloyat__nomi", "manzil__tuman__nomi", "manzil__mahalla", "manzil__kocha_nomi",
+            "bemor_holati__holati", "operatsiya_bolgan_joy__operatsiya_bolgan_joy",
+            "qoshimcha_malumotlar", "arxivga_olingan_sana"
+        )
+
+        today = date.today().year
+
+        for bemor in bemorlar:
+            jshshir, ism, familiya, tugilgan_sana, jinsi, viloyat, tuman, mahalla, kocha, holat, operatsiya_joyi, qoshimcha, arxiv_sana = bemor
+
+            birth_date = tugilgan_sana.strftime("%d-%m-%Y") if tugilgan_sana else ""
+            yosh = today - tugilgan_sana.year if tugilgan_sana else ""
+
+            gender = "Erkak" if jinsi == "M" else "Ayol"
+
+            address_parts = filter(None, [viloyat, tuman, mahalla, kocha])  # Bo‘sh joylarni olib tashlaydi
+            address = ", ".join(address_parts)
+
+            arxiv_sana = arxiv_sana.strftime("%d-%m-%Y") if arxiv_sana else ""
+
+            ws.append([jshshir, ism, familiya, birth_date, yosh, gender, address, holat, operatsiya_joyi, qoshimcha,
+                       arxiv_sana])
+
+        for col in ws.columns:
+            max_length = 0
+            col_letter = col[0].column_letter
+            for cell in col:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = 'attachment; filename="bemorlar.xlsx"'
+        wb.save(response)
+
+        return response
