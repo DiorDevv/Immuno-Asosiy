@@ -86,7 +86,6 @@ class OperatsiyaBolganJoySerializer(serializers.ModelSerializer):
         model = OperatsiyaBolganJoy
         fields = '__all__'
 
-
 class BemorningHolatiSerializer(serializers.ModelSerializer):
     class Meta:
         model = BemorningHolati
