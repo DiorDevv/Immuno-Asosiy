@@ -1,20 +1,22 @@
 from datetime import date
 import openpyxl
-from rest_framework import status, generics, serializers
+from rest_framework import status, serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor
+from rest_framework.permissions import AllowAny
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
-    BemorningHolatiSerializer, BemorSerializer
-from rest_framework import viewsets, permissions
-from rest_framework.viewsets import ReadOnlyModelViewSet
+    BemorSerializer
+from rest_framework import permissions
 from rest_framework import viewsets, filters
 from rest_framework.exceptions import ValidationError
 from openpyxl.styles import Alignment
 # import csv
+from django.db.models import Count, F, Value
 from django.http import HttpResponse
 from django.views import View
+from django.db.models.functions import Coalesce
 
 
 class BemorQoshishCreateView(CreateAPIView):
@@ -176,3 +178,28 @@ class ExportBemorExcelView(View):
         wb.save(response)
 
         return response
+
+
+class BemorHolatiStatistika(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        # Holatlar bo‘yicha statistika
+        statistikalar = (
+            Bemor.objects
+            .annotate(
+                holati_nomi=Coalesce(F('bemor_holati__holati'), Value("Noma'lum"))
+            )
+            .values('holati_nomi')
+            .annotate(soni=Count('id'))
+            .order_by('-soni')
+        )
+
+        # Jami bemorlar soni
+        jami_bemorlar_soni = Bemor.objects.count()
+
+        return Response({
+            "success": True,
+            "data": list(statistikalar),
+            "jami_bemorlar": jami_bemorlar_soni  # Umumiy bemorlar soni qo‘shildi
+        })
