@@ -16,11 +16,11 @@ from .views import (
 router = DefaultRouter()
 
 # Register viewsets with the router
-router.register(r'/medication-types', MedicationTypeViewSet, basename='medicationtype')
+router.register(r'medication-types', MedicationTypeViewSet, basename='medicationtype')
 # router.register(r'doriii', DoriWiew)
-router.register(r'/medications', MedicationViewSet, basename='medication')
-router.register(r'/patients', PatientViewSet, basename='patient')
-router.register(r'/inventory-transactions', InventoryTransactionViewSet, basename='inventorytransaction')
+router.register(r'medications', MedicationViewSet, basename='medication')
+router.register(r'patients', PatientViewSet, basename='patient')
+router.register(r'inventory-transactions', InventoryTransactionViewSet, basename='inventorytransaction')
 
 # Define URL patterns
 urlpatterns = [
