@@ -97,21 +97,54 @@ class BemorningHolatiSerializer(serializers.ModelSerializer):
 
 
 class BemorSerializer(serializers.ModelSerializer):
-    bemor = serializers.PrimaryKeyRelatedField(queryset=BemorQoshish.objects.all())
-    manzil = serializers.PrimaryKeyRelatedField(queryset=Manzil.objects.all())
-    bemor_holati = serializers.PrimaryKeyRelatedField(queryset=BemorningHolati.objects.all())
-    operatsiya_bolgan_joy = serializers.PrimaryKeyRelatedField(queryset=OperatsiyaBolganJoy.objects.all())
+    # ID larni faqat yozish uchun ishlatamiz (write_only=True)
+    bemor = serializers.PrimaryKeyRelatedField(queryset=BemorQoshish.objects.all(), write_only=True)
+    bemor_holati = serializers.PrimaryKeyRelatedField(queryset=BemorningHolati.objects.all(), write_only=True)
+    manzil = serializers.PrimaryKeyRelatedField(queryset=Manzil.objects.all(), required=False, allow_null=True,
+                                                write_only=True)
+    operatsiya_bolgan_joy = serializers.PrimaryKeyRelatedField(queryset=OperatsiyaBolganJoy.objects.all(),
+                                                               required=False, allow_null=True, write_only=True)
+
+    # Ob'ektlarni olish uchun serializerlar (read_only=True)
+    bemor_detail = BemorQoshishSerializer(source='bemor', read_only=True)
+    bemor_holati_detail = BemorningHolatiSerializer(source='bemor_holati', read_only=True)
+    manzil_detail = ManzilSerializer(source='manzil', read_only=True)
+    operatsiya_bolgan_joy_detail = OperatsiyaBolganJoySerializer(source='operatsiya_bolgan_joy', read_only=True)
 
     class Meta:
         model = Bemor
         fields = '__all__'
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+
+        if request and request.method == 'POST':
+            # POST so‘rovdan so‘ng yangi ID qaytarish
+            return {
+                "id": instance.id,  # Nechanchi bemor bo‘lib qo‘shilgani
+                "bemor": data.get('bemor_detail'),
+                "bemor_holati": data.get('bemor_holati_detail')
+            }
+        elif request and request.parser_context['kwargs'].get('pk'):
+            # Detail (ID bilan)
+            data['bemor'] = data.pop('bemor_detail', None)
+            data['bemor_holati'] = data.pop('bemor_holati_detail', None)
+        else:
+            # List (ID'siz faqat `bemor` va `bemor_holati`)
+            data = {
+                "bemor": data.pop('bemor_detail', None),
+                "bemor_holati": data.pop('bemor_holati_detail', None)
+            }
+        return data
+
     def validate_arxivga_olingan_sana(self, value):
-        if value and value > timezone.now():
-            raise serializers.ValidationError("Arxivga olish sanasi kelajakdagi sana bo‘lishi mumkin emas!")
-        if value and self.instance and value < self.instance.created_at:
-            raise serializers.ValidationError(
-                "Arxivga olish sanasi bemor yaratilgan sanadan oldin bo‘lishi mumkin emas!")
+        if value:
+            if value > timezone.now():
+                raise serializers.ValidationError("Arxivga olish sanasi kelajakdagi sana bo‘lishi mumkin emas!")
+            if self.instance and value < self.instance.created_at:
+                raise serializers.ValidationError(
+                    "Arxivga olish sanasi bemor yaratilgan sanadan oldin bo‘lishi mumkin emas!")
         return value
 
     def validate_biriktirilgan_file(self, value):
@@ -130,9 +163,6 @@ class BemorSerializer(serializers.ModelSerializer):
 
         if not data.get('bemor'):
             errors['bemor'] = "Bemor maydoni bo‘sh bo‘lishi mumkin emas!"
-
-        if not data.get('bemor_holati'):
-            errors['bemor_holati'] = "Bemor holati tanlanishi shart!"
 
         if errors:
             raise serializers.ValidationError(errors)
