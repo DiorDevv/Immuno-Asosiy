@@ -1,45 +1,110 @@
 from django.db import models
-from django.db.models import Model, CharField, IntegerField, DateField, TextField, ManyToManyField, PositiveIntegerField
-from shared.models import BaseModel
+from django.db.models import Sum
+from django.utils import timezone
 
-class DoriTuri(Model):
-    dori_dori = CharField(max_length=255)
+from bemor.models import Bemor
 
-    def __str__(self):
-        return self.dori_dori
 
-class Dori(BaseModel):
-    nomi = CharField(max_length=255)
-    dozasi = PositiveIntegerField()
-    chiqarilgan_sana = DateField()
-    yaroqlilik_muddati = DateField()
-    fayl_turi = CharField(max_length=25)
-    seria_raqam = CharField(max_length=25)
+class MedicationType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.nomi
+        return self.name
 
-class DoriQabulQilish(BaseModel):
-    murojaat_sababi = TextField()
-    berilgan_sana = DateField()
-    davolash_turi = CharField(max_length=255)
-    muassasa_nomi = CharField(max_length=255)
 
-    def __str__(self):
-        # Convert the date to a string
-        return str(self.berilgan_sana)
-        # Or provide more context, e.g.:
-        # return f"{self.muassasa_nomi} - {self.berilgan_sana}"
-
-class DoriQabulYakun(Model):
-    qabul_qilish_sanasi = DateField()
-    muddati = PositiveIntegerField(default=1)
-    oxirgi_qabul_sanasi = DateField()
-    bemor = ManyToManyField('bemor.Bemor', related_name='dori_qabul_yakun')
+class Medication(models.Model):
+    type = models.ForeignKey(MedicationType, on_delete=models.CASCADE, related_name='medications')
+    name = models.CharField(max_length=100)
+    dosage = models.DecimalField(max_digits=10, decimal_places=2)
+    dosage_unit = models.CharField(max_length=10, default='mg')
 
     def __str__(self):
-        # Since bemor is a ManyToManyField, we can't return it directly
-        # Instead, return something meaningful like the date or a combination
-        return f"Qabul {self.qabul_qilish_sanasi}"
-        # Or if you want to include bemor info:
-        # return f"Qabul {self.qabul_qilish_sanasi} - {', '.join(bemor.str() for bemor in self.bemor.all())}"
+        return f"{self.name} {self.dosage}{self.dosage_unit}"
+
+
+    def total_input(self):
+        return self.inventory_transactions.filter(transaction_type='INPUT').aggregate(
+            total=Sum('quantity'))['total'] or 0
+
+    def total_output(self):
+        return self.inventory_transactions.filter(transaction_type='OUTPUT').aggregate(
+            total=Sum('quantity'))['total'] or 0
+
+    def balance(self):
+        return self.total_input() - self.total_output()
+
+    def warehouse_quantity(self):
+        return self.balance()
+
+
+
+
+class InventoryTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('INPUT', 'Kirim'),
+        ('OUTPUT', 'Chiqim'),
+    ]
+
+    medication = models.ForeignKey(Medication, on_delete=models.CASCADE, related_name='inventory_transactions')
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    quantity = models.PositiveIntegerField()
+    date = models.DateTimeField(default=timezone.now)
+    notes = models.TextField(blank=True, null=True)
+    archived = models.BooleanField(default=False)
+    patient = models.ForeignKey(Bemor, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='medication_transactions')
+
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - {self.medication.name} - {self.quantity}"
+
+    class Meta:
+        ordering = ['-date']
+
+
+class MedicationDetails(models.Model):
+    """Additional details about medications that can be displayed in the info panel"""
+    medication = models.OneToOneField(Medication, on_delete=models.CASCADE, related_name='details')
+    description = models.TextField(blank=True)
+    usage_instructions = models.TextField(blank=True)
+    side_effects = models.TextField(blank=True)
+    contraindications = models.TextField(blank=True)
+    storage_instructions = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Details for {self.medication}"
+
+
+class MedicationPrescription(models.Model):
+    patient = models.ForeignKey(Bemor, on_delete=models.CASCADE, related_name='prescriptions')
+    prescription_date = models.DateField(default=timezone.now)
+    prescription_number = models.CharField(max_length=20)
+    institution = models.CharField(max_length=100)
+    doctor = models.CharField(max_length=100)
+    reason = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"#{self.prescription_number}"
+
+    class Meta:
+        ordering = ['-prescription_date']
+
+
+class PrescribedMedication(models.Model):
+    prescription = models.ForeignKey(MedicationPrescription, on_delete=models.CASCADE, related_name='medications')
+    medication = models.ForeignKey(Medication, on_delete=models.CASCADE)
+    daily_dose = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField()
+    serial_number = models.CharField(max_length=20, blank=True)
+    administration_period = models.PositiveIntegerField(help_text="Duration in days")
+    start_date = models.DateField()
+    end_date = models.DateField()
+    intake_instructions = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.medication.name} - {self.daily_dose}{self.medication.dosage_unit}"
+
+    @property
+    def is_active(self):
+        today = timezone.now().date()
+        return self.start_date <= today <= self.end_date

@@ -29,7 +29,7 @@ class BemorQoshishSerializer(serializers.ModelSerializer):
 
     def validate_JSHSHIR(self, value):
         if not value.isdigit() or len(value) != 14:
-            raise serializers.ValidationError("JSHSHIR faqat 14 ta raqamdan iborat bo‘lishi kerak!")
+            raise serializers.ValidationError("JSHSHIR faqat 14 ta raqamfdan iborat bo‘lishi kerak!")
 
         return value
 

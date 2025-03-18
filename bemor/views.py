@@ -37,6 +37,7 @@ class BemorQoshishCreateView(CreateAPIView):
                 {
                     "message": "Bemor muvaffaqiyatli qo‘shildi!" if created else "Bemor allaqachon mavjud!",
                     "data": {
+                        'id': bemor.id,
                         "JSHSHIR": bemor.JSHSHIR,
                         "ism": bemor.ism,
                         "familiya": bemor.familiya,
@@ -94,7 +95,7 @@ class BemorViewSet(viewsets.ModelViewSet):
                 raise ValidationError({"error": "Bemor ID kiritilishi shart!"})
 
             # Bemor mavjudligini tekshirish
-            if not Bemor.objects.filter(id=bemor_id).exists():
+            if not BemorQoshish.objects.filter(id=bemor_id).exists():
                 return Response(
                     {"error": "Bunday bemor mavjud emas!"},
                     status=status.HTTP_400_BAD_REQUEST
