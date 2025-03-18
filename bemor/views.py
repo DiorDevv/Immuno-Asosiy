@@ -37,6 +37,7 @@ class BemorQoshishCreateView(CreateAPIView):
                 {
                     "message": "Bemor muvaffaqiyatli qo‘shildi!" if created else "Bemor allaqachon mavjud!",
                     "data": {
+                        'id': bemor.id,
                         "JSHSHIR": bemor.JSHSHIR,
                         "ism": bemor.ism,
                         "familiya": bemor.familiya,
@@ -66,7 +67,6 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
     queryset = OperatsiyaBolganJoy.objects.all()
     serializer_class = OperatsiyaBolganJoySerializer
 
-
     def perform_create(self, serializer):
         # Qo‘shimcha tekshiruv: operatsiya sanasi tugash sanasidan oldin bo‘lishi kerak
         transplantatsiya_sana = serializer.validated_data.get('transplantatsiya_sana')
@@ -95,7 +95,7 @@ class BemorViewSet(viewsets.ModelViewSet):
                 raise ValidationError({"error": "Bemor ID kiritilishi shart!"})
 
             # Bemor mavjudligini tekshirish
-            if not Bemor.objects.filter(id=bemor_id).exists():
+            if not BemorQoshish.objects.filter(id=bemor_id).exists():
                 return Response(
                     {"error": "Bunday bemor mavjud emas!"},
                     status=status.HTTP_400_BAD_REQUEST
