@@ -180,6 +180,7 @@ class ExportBemorExcelView(View):
         return response
 
 
+
 class BemorHolatiStatistika(APIView):
     permission_classes = []
 
