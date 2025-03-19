@@ -322,3 +322,5 @@ class AttachmentViewSet(viewsets.ModelViewSet):
         """Download an attachment"""
         attachment = self.get_object()
         return FileResponse(attachment.file, as_attachment=True, filename=attachment.name)
+
+

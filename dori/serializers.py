@@ -185,3 +185,4 @@ class NotificationDetailSerializer(serializers.ModelSerializer):
 
     def get_has_attachments(self, obj):
         return obj.attachments.exists()
+
