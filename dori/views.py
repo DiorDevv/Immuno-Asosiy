@@ -5,17 +5,17 @@ from rest_framework.decorators import action
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from django.db.models import Sum, F, Q, IntegerField, Subquery
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 import pandas as pd
 from datetime import datetime
 from django.utils.timezone import make_aware
-from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails
+from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, Notification, Attachment
 from .serializers import (
     MedicationTypeSerializer,
     MedicationSerializer,
     MedicationDetailSerializer,
     InventoryTransactionSerializer,
-    MedicationDetailsSerializer
+    MedicationDetailsSerializer, NotificationDetailSerializer, NotificationListSerializer, AttachmentSerializer
 )
 from .models import MedicationPrescription, PrescribedMedication
 from .serializers import MedicationPrescriptionSerializer, PrescribedMedicationSerializer
@@ -259,3 +259,66 @@ class PrescribedMedicationDetailView(RetrieveUpdateDestroyAPIView):
     queryset = PrescribedMedication.objects.all()
     serializer_class = PrescribedMedicationSerializer
     permission_classes = []
+
+# Notifications
+
+
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    """API endpoint for notifications"""
+    queryset = Notification.objects.all()
+    # filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status', 'notification_type']
+    search_fields = ['message', 'medication__name']
+    ordering_fields = ['created_at', 'status']
+    permission_classes = []
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return NotificationDetailSerializer
+        return NotificationListSerializer
+
+    @action(detail=True, methods=['post'])
+    def accept(self, request, pk=None):
+        """Accept a notification"""
+        notification = self.get_object()
+        notification.status = 'accepted'
+        notification.save()
+        return Response({'status': 'notification accepted'})
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Reject a notification"""
+        notification = self.get_object()
+        notification.status = 'rejected'
+        notification.save()
+        return Response({'status': 'notification rejected'})
+
+    @action(detail=True, methods=['get'])
+    def download_pdf(self, request, pk=None):
+        """Download notification as PDF"""
+        # You would implement PDF generation here
+        # For now, returning a placeholder response
+        return Response({'status': 'PDF download feature will be implemented'})
+
+    @action(detail=True, methods=['get'])
+    def attachments(self, request, pk=None):
+        """Get all attachments for a notification"""
+        notification = self.get_object()
+        attachments = notification.attachments.all()
+        serializer = AttachmentSerializer(attachments, many=True)
+        return Response(serializer.data)
+
+
+class AttachmentViewSet(viewsets.ModelViewSet):
+    """API endpoint for file attachments"""
+    queryset = Attachment.objects.all()
+    serializer_class = AttachmentSerializer
+    permission_classes = []
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        """Download an attachment"""
+        attachment = self.get_object()
+        return FileResponse(attachment.file, as_attachment=True, filename=attachment.name)

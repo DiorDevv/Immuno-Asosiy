@@ -108,3 +108,62 @@ class PrescribedMedication(models.Model):
     def is_active(self):
         today = timezone.now().date()
         return self.start_date <= today <= self.end_date
+
+
+#  Notifications
+class Notification(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('sent', 'Sent'),
+        ('accepted', 'Qabul qilindi'),
+        ('rejected', 'Rejected'),
+    )
+
+    TYPE_CHOICES = (
+        ('entry', 'Entry'),
+        ('exit', 'Exit'),
+    )
+
+    id = models.AutoField(primary_key=True)
+    notification_type = models.CharField("Notification Type", max_length=10, choices=TYPE_CHOICES, default='entry')
+    message = models.CharField("Ma'lumot", max_length=255)
+    quantity = models.IntegerField("Miqdori", default=10)
+    created_at = models.DateTimeField("Sana", auto_now_add=True)
+    status = models.CharField(
+        "Status",
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
+    # Fields for detailed view
+    medication = models.ForeignKey(
+        Medication,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        verbose_name="Medication"
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Notification"
+        verbose_name_plural = "Notifications"
+
+    def __str__(self):
+        return f"{self.id} - {self.message}"
+
+
+class Attachment(models.Model):
+
+    notification = models.ForeignKey(
+        Notification,
+        on_delete=models.CASCADE,
+        related_name='attachments',
+        verbose_name="Notification"
+    )
+    file = models.FileField("File", upload_to='notifications/')
+    name = models.CharField("Name", max_length=255)
+    uploaded_at = models.DateTimeField("Uploaded At", auto_now_add=True)
+
+    def __str__(self):
+        return self.name

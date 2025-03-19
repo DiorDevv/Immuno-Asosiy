@@ -8,7 +8,7 @@ from .views import (
     MedicationPrescriptionListCreateView,
     MedicationPrescriptionDetailView,
     PrescribedMedicationListCreateView,
-    PrescribedMedicationDetailView,
+    PrescribedMedicationDetailView, NotificationViewSet, AttachmentViewSet,
 
 )
 
@@ -21,6 +21,8 @@ router.register(r'medication-types', MedicationTypeViewSet, basename='medication
 router.register(r'medications', MedicationViewSet, basename='medication')
 router.register(r'patients', PatientViewSet, basename='patient')
 router.register(r'inventory-transactions', InventoryTransactionViewSet, basename='inventorytransaction')
+router.register(r'notifications', NotificationViewSet)
+router.register(r'attachments', AttachmentViewSet)
 
 # Define URL patterns
 urlpatterns = [
