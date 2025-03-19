@@ -122,6 +122,7 @@ class BemorViewSet(viewsets.ModelViewSet):
             return Response({"error": f"Server xatosi: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
 class ExportBemorExcelView(View):
 
     def get(self, request, *args, **kwargs):
