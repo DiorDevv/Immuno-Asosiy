@@ -25,7 +25,7 @@ from .models import (
     InventoryTransaction,
     MedicationDetails,
     MedicationPrescription,
-    PrescribedMedication
+    PrescribedMedication, Notification, Attachment
 )
 
 # Register for MedicationType
@@ -134,3 +134,11 @@ class PrescribedMedicationAdmin(admin.ModelAdmin):
             'fields': ('administration_period', 'start_date', 'end_date', 'serial_number', 'intake_instructions')
         }),
     )
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('notification_type','message', 'quantity', 'created_at', 'status')
+
+@admin.register(Attachment)
+class ModelNameAdmin(admin.ModelAdmin):
+    list_display = ('name',)
