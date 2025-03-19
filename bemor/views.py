@@ -18,6 +18,10 @@ from django.http import HttpResponse
 from django.views import View
 from django.db.models.functions import Coalesce
 
+from rest_framework.views import APIView
+from django.http import HttpResponse
+from .utils import generate_bemor_pdf
+
 
 class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
@@ -122,7 +126,6 @@ class BemorViewSet(viewsets.ModelViewSet):
             return Response({"error": f"Server xatosi: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class ExportBemorExcelView(View):
 
     def get(self, request, *args, **kwargs):
@@ -181,7 +184,6 @@ class ExportBemorExcelView(View):
         return response
 
 
-
 class BemorHolatiStatistika(APIView):
     permission_classes = []
 
@@ -205,3 +207,10 @@ class BemorHolatiStatistika(APIView):
             "data": list(statistikalar),
             "jami_bemorlar": jami_bemorlar_soni  # Umumiy bemorlar soni qo‘shildi
         })
+
+
+class BemorPDFDownloadView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        return generate_bemor_pdf(pk)
