@@ -65,7 +65,11 @@ class ShifokorDetailUpdateModelSerializer(ModelSerializer):
                   'mutaxasislik_toifasi')
 
 
-
+class ArxivShifokorModelSerializer(ModelSerializer):
+    shifokor = ShaxsiyMalumotlarModelSerializer
+    class Meta:
+        model = Shifokorlar
+        fields = ('shifokor', 'lavozimi', 'mutaxasislik_toifasi', 'telefon_raqami', 'arxivga_olingan_sana')
 
 
 

@@ -31,6 +31,5 @@ class Shifokorlar(Model):
     ish_staji = IntegerField()
     oxirgi_malaka_oshirgan_joyi = CharField(max_length=150)
     qayta_malaka_oshirish_vaqti = DateField(db_default=datetime.datetime.now())
+    arxivga_olingan_sana = DateField(null=True)
 
-    def fio(self):
-        return f"{self.shifokor__ismi} {self.shifokor__familya} {self.shifokor__otasining_ismi}"

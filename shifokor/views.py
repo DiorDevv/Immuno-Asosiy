@@ -1,8 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from shifokor.models import Shifokorlar, ShifokorQoshish
-from .serializers import ShifokorModelSerializer, ShifokorListSerializer, ShifokorDetailUpdateModelSerializer
+from .serializers import ShifokorModelSerializer, ShifokorListSerializer, ShifokorDetailUpdateModelSerializer, \
+    ArxivShifokorModelSerializer
 from shifokor.serializers import ShifokorQoshishModelSerializer
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.permissions import AllowAny
@@ -54,5 +55,17 @@ class Shifokor_qoshish(CreateAPIView):
             },
             status=HTTP_400_BAD_REQUEST
         )
+
+
+class ArxivShifokorlar(ListAPIView):
+    queryset = Shifokorlar.objects.all()
+    serializer_class = ArxivShifokorModelSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(arxivga_olingan_sana__isnull = False)
+        return qs
+
+
 
 
