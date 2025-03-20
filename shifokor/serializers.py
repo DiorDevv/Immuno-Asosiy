@@ -3,15 +3,6 @@ from rest_framework.serializers import ModelSerializer, CharField
 from shifokor.models import Shifokorlar, ShifokorQoshish
 from rest_framework.serializers import ValidationError
 
-class ShifokorModelSerializer(ModelSerializer):
-    class Meta:
-        model = Shifokorlar
-        fields = ("shifokor","lavozimi","mutaxasislik_toifasi","telefon_raqami",
-                   "ish_staji", "oxirgi_malaka_oshirgan_joyi", 'biriktirilgan_muassasa')
-
-
-
-
 class ShifokorQoshishModelSerializer(ModelSerializer):
     class Meta:
         model = ShifokorQoshish
@@ -44,19 +35,34 @@ class ShifokorQoshishModelSerializer(ModelSerializer):
 
 
 
-class ShifokorListSerializer(ModelSerializer):
-    ismi = CharField(source='shifokor__ismi', read_only=True)
-    familya = CharField(source='shifokor__familya', read_only=True)
-    otasining_ismi = CharField(source='shifokor__otasining_ismi', read_only=True)
-    tugilgan_sana = CharField(source='shifokor__tugilgan_sana', read_only=True)
+class ShifokorModelSerializer(ModelSerializer):
     class Meta:
         model = Shifokorlar
-        fields = ('id', 'ismi', 'familya', 'otasining_ismi', 'tugilgan_sana', 'lavozimi', 'mutaxasislik_toifasi',
+        fields = ("shifokor","lavozimi","mutaxasislik_toifasi","telefon_raqami",
+                   "ish_staji", "oxirgi_malaka_oshirgan_joyi", 'biriktirilgan_muassasa')
+
+
+class ShaxsiyMalumotlarModelSerializer(ModelSerializer):
+    class Meta:
+        model = ShifokorQoshish
+        fields = ('id', 'ismi', 'familya', 'otasining_ismi', 'tugilgan_sana')
+
+
+class ShifokorListSerializer(ModelSerializer):
+    shifokor = ShaxsiyMalumotlarModelSerializer()
+    class Meta:
+        model = Shifokorlar
+        fields = ('shifokor', 'lavozimi', 'mutaxasislik_toifasi',
                   'telefon_raqami')
-        print(fields.__class__)
 
 
+class ShifokorDetailUpdateModelSerializer(ModelSerializer):
+    shifokor = ShaxsiyMalumotlarModelSerializer()
 
+    class Meta:
+        model = Shifokorlar
+        fields = ('shifokor', 'ish_staji', 'oxirgi_malaka_oshirgan_joyi', 'qayta_malaka_oshirish_vaqti',
+                  'mutaxasislik_toifasi')
 
 
 

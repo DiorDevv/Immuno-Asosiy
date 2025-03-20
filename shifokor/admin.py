@@ -2,10 +2,10 @@ from django.contrib import admin
 
 from shifokor.models import ShifokorQoshish, Shifokorlar
 
-
-class ShifokorInline(admin.TabularInline):  # Bemorlarni boshqa adminlarda ichki jadval sifatida ko‘rsatish
+@admin.register(ShifokorQoshish)
+class ShifokorInline(admin.ModelAdmin):  # Bemorlarni boshqa adminlarda ichki jadval sifatida ko‘rsatish
     model = ShifokorQoshish
-    fields = '__all__'
+    fields = ("jshshir", "familya", "ismi", "otasining_ismi", "jinsi", "tugilgan_sana")
 
 @admin.register(Shifokorlar)
 class ShifokorModeladmin(admin.ModelAdmin):

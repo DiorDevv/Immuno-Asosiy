@@ -1,3 +1,5 @@
+import datetime
+
 from django.db.models import Model, CharField, IntegerField, DateField, OneToOneField, CASCADE
 
 
@@ -28,7 +30,7 @@ class Shifokorlar(Model):
     biriktirilgan_muassasa = CharField(null=True)
     ish_staji = IntegerField()
     oxirgi_malaka_oshirgan_joyi = CharField(max_length=150)
-
+    qayta_malaka_oshirish_vaqti = DateField(db_default=datetime.datetime.now())
 
     def fio(self):
         return f"{self.shifokor__ismi} {self.shifokor__familya} {self.shifokor__otasining_ismi}"
