@@ -2,7 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from shifokor.models import Shifokorlar, ShifokorQoshish
-from .serializers import ShifokorModelSerializer
+from .serializers import ShifokorModelSerializer, ShifokorListSerializer
 from shifokor.serializers import ShifokorQoshishModelSerializer
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.permissions import AllowAny
@@ -12,6 +12,10 @@ class ShifokorModelViewSet(ModelViewSet):
     queryset = Shifokorlar.objects.all()
     serializer_class = ShifokorModelSerializer
     permission_classes = (AllowAny,)
+
+    def list(self, request, *args, **kwargs):
+        self.serializer_class = ShifokorListSerializer
+        return super().list(request, *args, **kwargs)
 
 
 class Shifokor_qoshish(CreateAPIView):

@@ -28,3 +28,7 @@ class Shifokorlar(Model):
     biriktirilgan_muassasa = CharField(null=True)
     ish_staji = IntegerField()
     oxirgi_malaka_oshirgan_joyi = CharField(max_length=150)
+
+
+    def fio(self):
+        return f"{self.shifokor__ismi} {self.shifokor__familya} {self.shifokor__otasining_ismi}"
