@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'import_export',
-
+    'drf_yasg',
     #    app
     'users',
     'shared',
