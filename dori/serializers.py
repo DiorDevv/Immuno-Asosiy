@@ -120,3 +120,69 @@ class MedicationPrescriptionSerializer(serializers.ModelSerializer):
         instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.save()
         return instance
+
+# Notifications
+
+from rest_framework import serializers
+from .models import Medication, Notification, Attachment
+
+
+class MedicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medication
+        fields = '__all__'
+
+
+class AttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = ['id', 'file', 'name', 'uploaded_at']
+
+
+class NotificationListSerializer(serializers.ModelSerializer):
+    """Serializer for listing notifications (Image 1)"""
+    sana = serializers.DateTimeField(source='created_at', format='%d.%m.%Y', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'message', 'quantity', 'sana', 'status', 'status_display']
+
+
+class NotificationDetailSerializer(serializers.ModelSerializer):
+    """Serializer for detailed notification view (Image 2)"""
+    sana = serializers.DateTimeField(source='created_at', format='%d.%m.%Y', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    # Medication details
+    dori_turi = serializers.CharField(source='medication.get_type_display', read_only=True)
+    dori_nomi = serializers.CharField(source='medication.name', read_only=True)
+    dori_dozasi = serializers.FloatField(source='medication.dosage', read_only=True)
+    miqdori = serializers.IntegerField(source='medication.quantity', read_only=True)
+    seriya_raqami = serializers.CharField(source='medication.serial_number', read_only=True)
+    ishlab_chiqarilgan_sana = serializers.DateField(
+        source='medication.production_date',
+        format='%d.%m.%Y',
+        read_only=True
+    )
+    yaroqlilik_muddati = serializers.DateField(
+        source='medication.expiry_date',
+        format='%d.%m.%Y',
+        read_only=True
+    )
+
+    # Attachment info
+    has_attachments = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Notification
+        fields = [
+            'id', 'message', 'sana', 'status', 'status_display',
+            'dori_turi', 'dori_nomi', 'dori_dozasi', 'miqdori',
+            'seriya_raqami', 'ishlab_chiqarilgan_sana', 'yaroqlilik_muddati',
+            'has_attachments'
+        ]
+
+    def get_has_attachments(self, obj):
+        return obj.attachments.exists()
+
