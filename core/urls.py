@@ -7,5 +7,5 @@ urlpatterns = [
     path('users/api/', include("users.urls")),
     path('bemor/api/', include("bemor.urls")),
     path('dori/api/', include('dori.urls')),
-    path('shifokor/api', include('shifokor.urls')),
+    path('shifokor/api/', include('shifokor.urls')),
 ]
