@@ -123,7 +123,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-print(os.getenv("USER"))
+# print(os.getenv("USER"))
 
 DATABASES = {
     "default": {
