@@ -1,15 +1,7 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, CharField
 
 from shifokor.models import Shifokorlar, ShifokorQoshish
 from rest_framework.serializers import ValidationError
-
-class ShifokorModelSerializer(ModelSerializer):
-    class Meta:
-        model = Shifokorlar
-        fields = ("shifokor","lavozimi","mutaxasislik_toifasi","telefon_raqami",
-                   "ish_staji", "oxirgi_malaka_oshirgan_joyi", 'biriktirilgan_muassasa')
-
-
 
 class ShifokorQoshishModelSerializer(ModelSerializer):
     class Meta:
@@ -39,3 +31,51 @@ class ShifokorQoshishModelSerializer(ModelSerializer):
 
     def is_valid(self, *, raise_exception=True):
         return super().is_valid(raise_exception=raise_exception)
+
+
+
+
+class ShifokorModelSerializer(ModelSerializer):
+    class Meta:
+        model = Shifokorlar
+        fields = ("shifokor","lavozimi","mutaxasislik_toifasi","telefon_raqami",
+                   "ish_staji", "oxirgi_malaka_oshirgan_joyi", 'biriktirilgan_muassasa')
+
+
+class ShaxsiyMalumotlarModelSerializer(ModelSerializer):
+    class Meta:
+        model = ShifokorQoshish
+        fields = ('id', 'ismi', 'familya', 'otasining_ismi', 'tugilgan_sana')
+
+
+class ShifokorListSerializer(ModelSerializer):
+    shifokor = ShaxsiyMalumotlarModelSerializer()
+    class Meta:
+        model = Shifokorlar
+        fields = ('shifokor', 'lavozimi', 'mutaxasislik_toifasi',
+                  'telefon_raqami')
+
+
+class ShifokorDetailUpdateModelSerializer(ModelSerializer):
+    shifokor = ShaxsiyMalumotlarModelSerializer()
+
+    class Meta:
+        model = Shifokorlar
+        fields = ('shifokor', 'ish_staji', 'oxirgi_malaka_oshirgan_joyi', 'qayta_malaka_oshirish_vaqti',
+                  'mutaxasislik_toifasi')
+
+
+class ArxivShifokorModelSerializer(ModelSerializer):
+    shifokor = ShaxsiyMalumotlarModelSerializer
+    class Meta:
+        model = Shifokorlar
+        fields = ('shifokor', 'lavozimi', 'mutaxasislik_toifasi', 'telefon_raqami', 'arxivga_olingan_sana')
+
+
+
+
+
+
+
+
+
