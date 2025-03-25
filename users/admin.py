@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User
+from .models import CustomUser
 
 
-@admin.register(User)
+@admin.register(CustomUser)
 class UserAdmin(BaseUserAdmin):
+
     list_display = (
         'id', 'username', 'email', 'first_name', 'last_name',
         'role_user', 'auth_status', 'is_active', 'is_staff', 'is_superuser',
