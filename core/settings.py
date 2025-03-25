@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'dori',
     'shifokor',
 
-    'ariza'
+    'ariza',
 
     'seans',
 
