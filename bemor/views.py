@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor
 from rest_framework.permissions import AllowAny
+
+from .permissions import BemorPermission
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
     BemorSerializer
 from rest_framework import permissions
@@ -26,7 +28,7 @@ from .utils import generate_bemor_pdf
 class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
     serializer_class = BemorQoshishSerializer
-    permission_classes = [AllowAny]
+    permission_classes = []
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -88,7 +90,7 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
 class BemorViewSet(viewsets.ModelViewSet):
     queryset = Bemor.objects.all().order_by('-created_at')
     serializer_class = BemorSerializer
-    permission_classes = []
+    permission_classes = [AllowAny, ]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']
     ordering_fields = ['created_at', 'arxivga_olingan_sana']

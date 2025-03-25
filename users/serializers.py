@@ -1,11 +1,11 @@
 from django.contrib.auth.hashers import make_password
 from django.utils.crypto import get_random_string
-from .models import User, Role
+from .models import Role, CustomUser
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.translation import gettext_lazy as _
-
+from django.contrib.auth.models import User as DjangoUser
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -14,12 +14,12 @@ class SignUpSerializer(serializers.ModelSerializer):
     role_user = serializers.ChoiceField(choices=Role.choices, required=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ("id", "username", "password", "token", "role_user")
         extra_kwargs = {"id": {"read_only": True}}
 
     def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
+        if CustomUser.objects.filter(username=value).exists():
             raise serializers.ValidationError("Bu username allaqachon mavjud.")
         return value
 
@@ -32,7 +32,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         if not validated_data.get("username"):
             while True:
                 temp_username = f"user_{get_random_string(6)}"
-                if not User.objects.filter(username=temp_username).exists():
+                if not CustomUser.objects.filter(username=temp_username).exists():
                     validated_data["username"] = temp_username
                     break
 
@@ -60,7 +60,7 @@ class LoginSerializer(serializers.Serializer):
         username = data.get('username')
         password = data.get('password')
 
-        user = User.objects.filter(username=username).first()
+        user = CustomUser.objects.filter(username=username).first()
         print(user)
         if user is None:
             raise ValidationError({
