@@ -8,4 +8,5 @@ urlpatterns = [
     path('bemor/api/', include("bemor.urls")),
     path('dori/api/', include('dori.urls')),
     path('shifokor/api', include('shifokor.urls')),
+    path('ariza/api/', include('ariza.urls')),
 ]

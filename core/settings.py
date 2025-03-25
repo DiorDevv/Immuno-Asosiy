@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'dori',
     'shifokor',
+    'ariza'
 ]
 
 MIDDLEWARE = [
