@@ -5,10 +5,7 @@ from .views import (
     MedicationViewSet,
     PatientViewSet,
     InventoryTransactionViewSet,
-    MedicationPrescriptionListCreateView,
-    MedicationPrescriptionDetailView,
-    PrescribedMedicationListCreateView,
-    PrescribedMedicationDetailView, NotificationViewSet, AttachmentViewSet,
+    NotificationViewSet, AttachmentViewSet, MedicationPrescriptionDetailView,
 
 )
 
@@ -30,11 +27,7 @@ urlpatterns = [
     path('', include(router.urls)),
 
     # URLs for MedicationPrescription views
-    path(
-        'medication-prescriptions/',
-        MedicationPrescriptionListCreateView.as_view(),
-        name='medicationprescription-list-create'
-    ),
+
     path(
         'medication-prescriptions/<int:pk>/',
         MedicationPrescriptionDetailView.as_view(),
@@ -42,14 +35,10 @@ urlpatterns = [
     ),
 
     # URLs for PrescribedMedication views
-    path(
-        'prescribed-medications/',
-        PrescribedMedicationListCreateView.as_view(),
-        name='prescribedmedication-list-create'
-    ),
-    path(
-        'prescribed-medications/<int:pk>/',
-        PrescribedMedicationDetailView.as_view(),
-        name='prescribedmedication-detail'
-    ),
+
+    # path(
+    #     'prescribed-medications/<int:pk>/',
+    #     PrescribedMedicationDetailView.as_view(),
+    #     name='prescribedmedication-detail'
+    # ),
 ]

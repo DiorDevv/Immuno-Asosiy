@@ -127,10 +127,10 @@ from rest_framework import serializers
 from .models import Medication, Notification, Attachment
 
 
-class MedicationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Medication
-        fields = '__all__'
+# class MedicationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Medication
+#         fields = '__all__'
 
 
 class AttachmentSerializer(serializers.ModelSerializer):
