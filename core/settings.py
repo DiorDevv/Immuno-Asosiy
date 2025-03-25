@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'import_export',
-
+    'drf_yasg',
     #    app
     'users',
     'shared',
@@ -40,7 +40,11 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'dori',
     'shifokor',
+
     'ariza'
+
+    'seans',
+
 ]
 
 MIDDLEWARE = [
@@ -123,7 +127,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-print(os.getenv("USER"))
+# print(os.getenv("USER"))
 
 DATABASES = {
     "default": {
