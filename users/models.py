@@ -4,6 +4,7 @@ import uuid
 from django.contrib.auth.hashers import identify_hasher
 from django.utils.crypto import get_random_string
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from shared.models import BaseModel
 
 NEW, DONE = ('new', 'done',)
@@ -16,7 +17,7 @@ class Role(models.TextChoices):
     VRACH = "VRACH", "VRACH"
 
 
-class User(AbstractUser, BaseModel):
+class CustomUser(AbstractUser, BaseModel):
     AUTH_STATUS = (
         (NEW, NEW),
         (DONE, DONE),
@@ -32,6 +33,9 @@ class User(AbstractUser, BaseModel):
     user_permissions = models.ManyToManyField(
         "auth.Permission", related_name="custom_user_permissions", blank=True
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
     @property
     def full_name(self):
@@ -41,7 +45,7 @@ class User(AbstractUser, BaseModel):
         if not self.username:
             while True:
                 temp_username = f'Immuno-{get_random_string(6)}'
-                if not User.objects.filter(username=temp_username).exists():
+                if not CustomUser.objects.filter(username=temp_username).exists():
                     break
             self.username = temp_username
 

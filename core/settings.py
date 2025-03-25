@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
     #    package
     'rest_framework',
     'rest_framework_simplejwt',
+    # 'rest_framework.authtoken',
     'import_export',
     'drf_yasg',
     #    app
@@ -52,14 +54,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
+    ],
 }
 
 SIMPLE_JWT = {
@@ -120,7 +123,6 @@ TEMPLATES = [
     },
 ]
 
-
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # print(os.getenv("USER"))
@@ -135,6 +137,8 @@ DATABASES = {
         "PORT": os.getenv("PORT"),
     }
 }
+
+AUTH_USER_MODEL = 'users.CustomUser'
 
 # DATABASES = {
 #     'default': {
