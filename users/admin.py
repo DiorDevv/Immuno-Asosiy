@@ -5,6 +5,7 @@ from .models import CustomUser
 
 @admin.register(CustomUser)
 class UserAdmin(BaseUserAdmin):
+
     list_display = (
         'id', 'username', 'email', 'first_name', 'last_name',
         'role_user', 'auth_status', 'is_active', 'is_staff', 'is_superuser',
