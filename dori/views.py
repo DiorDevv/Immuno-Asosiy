@@ -17,7 +17,7 @@ from .serializers import (
     MedicationDetailsSerializer, NotificationDetailSerializer, NotificationListSerializer, AttachmentSerializer
 )
 from .models import MedicationPrescription, TavsiyaEtilganDori
-from .serializers import MedicationPrescriptionSerializer, PrescribedMedicationSerializer
+from .serializers import MedicationPrescriptionSerializer, TavsiyaEtilganDoriSerializer
 from bemor.serializers import BemorSerializer
 
 from rest_framework import viewsets, filters, status
@@ -25,6 +25,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
+from .models import QabulQilishYakuniy
+from .serializers import QabulQilishYakuniySerializer
 
 class MedicationTypeViewSet(viewsets.ModelViewSet):
     queryset = MedicationType.objects.all()
@@ -148,6 +150,18 @@ class InventoryTransactionViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(transaction_type=transaction_type)
 
         return queryset
+
+
+
+
+
+class DoriQabulQilishViewSet(viewsets.ModelViewSet):
+    queryset = QabulQilishYakuniy.objects.all()
+    serializer_class = QabulQilishYakuniySerializer
+    permission_classes = [AllowAny]
+
+    # Limit to GET and POST methods
+    http_method_names = ['get', 'post']
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -403,7 +417,7 @@ class MedicationPrescriptionDetailView(RetrieveUpdateDestroyAPIView):
 #
 class PrescribedMedicationListCreateView(ListAPIView):
     queryset = TavsiyaEtilganDori.objects.all()
-    serializer_class = PrescribedMedicationSerializer
+    serializer_class = TavsiyaEtilganDoriSerializer
     permission_classes = []
 
     def post(self, request, *args, **kwargs):

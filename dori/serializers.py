@@ -2,7 +2,8 @@ from django.db.models import Sum
 from rest_framework import serializers
 from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, TavsiyaEtilganDori, \
     MedicationPrescription
-
+from rest_framework import serializers
+from .models import QabulQilishYakuniy
 
 class MedicationTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,7 +74,7 @@ class MedicationSerializer(serializers.ModelSerializer):
     #     return obj.total_input-obj.total_output
 
 
-class PrescribedMedicationSerializer(serializers.ModelSerializer):
+class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
     medication = MedicationSerializer(read_only=True)  # Nested serializer for medication details
     medication_id = serializers.PrimaryKeyRelatedField(
         queryset=Medication.objects.all(),
@@ -84,14 +85,14 @@ class PrescribedMedicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = TavsiyaEtilganDori
         fields = [
-            'id', 'bemor_dori', 'dori_nomi', 'dori_nomi_id', 'kunlik_doza',
+            'id', 'bemor_dori', 'dori_nomi', 'kunlik_doza',
             'miqdori', 'seria_raqam', 'yaroqlilik_muddati', 'boshlanish',
             'tugallanish', 'qabul_qilish_muddati', 'is_active'
         ]
         read_only_fields = ['is_active']  # Calculated property
 
 class MedicationPrescriptionSerializer(serializers.ModelSerializer):
-    medications = PrescribedMedicationSerializer(many=True, read_only=True)  # Nested medications
+    medications = TavsiyaEtilganDoriSerializer(many=True, read_only=True)  # Nested medications
     patient = serializers.StringRelatedField()  # Display patient full_name
 
     class Meta:
@@ -107,7 +108,7 @@ class MedicationPrescriptionSerializer(serializers.ModelSerializer):
         medications_data = self.context.get('request').data.get('medications', [])
         prescription = MedicationPrescription.objects.create(**validated_data)
         for med_data in medications_data:
-            PrescribedMedication.objects.create(prescription=prescription, **med_data)
+            TavsiyaEtilganDori.objects.create(prescription=prescription, **med_data)
         return prescription
 
     def update(self, instance, validated_data):
@@ -120,6 +121,19 @@ class MedicationPrescriptionSerializer(serializers.ModelSerializer):
         instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.save()
         return instance
+
+
+
+class QabulQilishYakuniySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QabulQilishYakuniy
+        fields = [
+            'id',
+            'preparatni_qabul_qilish_sanasi',
+            'preparatni_qabul_qilish_muddati',
+            'oxirgi_qabul_qilish_sanasi'
+        ]
+        read_only_fields = ['oxirgi_qabul_qilish_sanasi']
 
 # Notifications
 
