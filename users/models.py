@@ -12,7 +12,7 @@ NEW, DONE = ('new', 'done',)
 class Role(models.TextChoices):
     TTB = "TTB", "TTB"
     VSSB = "VSSB", "VSSB"
-    BOSH_M = "Bosh_M", "Bosh M"
+    UZMED = "UZMED", "UZMED"
     VAZIR = "Vazir", "Vazir"
     VRACH = "VRACH", "VRACH"
 

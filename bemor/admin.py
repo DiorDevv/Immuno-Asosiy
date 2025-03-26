@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ExportMixin
 from .models import Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, BemorQoshish, Viloyat, Tuman, Manzil, \
-    ArxivSababi
+    ArxivSababi, DoriBerish
 
 
 class BemorInline(admin.TabularInline):  # Bemorlarni boshqa adminlarda ichki jadval sifatida ko‘rsatish
@@ -98,3 +98,28 @@ class BemorAdmin(ExportMixin, admin.ModelAdmin):
         }),
     )
     readonly_fields = ("arxivga_olingan_sana",)
+
+
+@admin.register(DoriBerish)
+class DoriBerishAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_patient_name', 'get_dori_nomi', 'get_dori_start_end_dates')
+    search_fields = ('dori__bemor_dori__patient__ism', 'dori__bemor_dori__patient__familiya', 'dori__dori_nomi__nomi')
+
+    def get_patient_name(self, obj):
+        if obj.dori and obj.dori.bemor_dori:
+            return f"{obj.dori.bemor_dori.patient.ism} {obj.dori.bemor_dori.patient.familiya}"
+        return "-"
+
+    get_patient_name.short_description = "Bemor"
+
+    def get_dori_nomi(self, obj):
+        return obj.dori.dori_nomi.nomi if obj.dori else "-"
+
+    get_dori_nomi.short_description = "Dori Nomi"
+
+    def get_dori_start_end_dates(self, obj):
+        if obj.dori:
+            return f"{obj.dori.boshlanish} → {obj.dori.tugallanish}"
+        return "-"
+
+    get_dori_start_end_dates.short_description = "Dori qabul muddati"
