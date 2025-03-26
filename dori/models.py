@@ -3,17 +3,23 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from bemor.models import Bemor
+from shared.models import BaseModel
 
 
-class MedicationType(models.Model):
+class MedicationType(BaseModel):
     name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+
+        verbose_name = "Dori Turi"
+        verbose_name_plural = "Dori Turlari"
 
     def __str__(self):
         return self.name
 
 
-class Medication(models.Model):
-    type = models.ForeignKey(MedicationType, on_delete=models.CASCADE, related_name='medications')
+class Medication(BaseModel):
+    type = models.ForeignKey(MedicationType, verbose_name='Dori' ,on_delete=models.CASCADE, related_name='medications')
     name = models.CharField(max_length=100)
     dosage = models.DecimalField(max_digits=10, decimal_places=2)
     dosage_unit = models.CharField(max_length=10, default='mg')
@@ -36,10 +42,13 @@ class Medication(models.Model):
     def warehouse_quantity(self):
         return self.balance()
 
+    class Meta:
+        verbose_name = "Dori"
+        verbose_name_plural = "Dorilari"
 
 
 
-class InventoryTransaction(models.Model):
+class InventoryTransaction(BaseModel):
     TRANSACTION_TYPES = [
         ('INPUT', 'Kirim'),
         ('OUTPUT', 'Chiqim'),
@@ -59,9 +68,11 @@ class InventoryTransaction(models.Model):
 
     class Meta:
         ordering = ['-date']
+        verbose_name = "Kirim Chiqim"
+        verbose_name_plural = "Kirim Chiqimlar"
 
 
-class MedicationDetails(models.Model):
+class MedicationDetails(BaseModel):
     """Additional details about medications that can be displayed in the info panel"""
     medication = models.OneToOneField(Medication, on_delete=models.CASCADE, related_name='details')
     description = models.TextField(blank=True)
@@ -73,8 +84,11 @@ class MedicationDetails(models.Model):
     def __str__(self):
         return f"Details for {self.medication}"
 
+    class Meta:
+        verbose_name = "Dori detail"
+        verbose_name_plural = "Dori details"
 
-class MedicationPrescription(models.Model):
+class MedicationPrescription(BaseModel):
     patient = models.ForeignKey(Bemor, on_delete=models.CASCADE, related_name='prescriptions')
     prescription_date = models.DateField(default=timezone.now)
     prescription_number = models.CharField(max_length=20)
@@ -88,10 +102,11 @@ class MedicationPrescription(models.Model):
 
     class Meta:
         ordering = ['-prescription_date']
+        verbose_name = "Qabul qilish bo'yicha malumot"
+        verbose_name_plural = "Qabul qilish bo'yicha malumotlar"
 
-
-class TavsiyaEtilganDori(models.Model):
-    bemor_dori = models.ForeignKey(MedicationPrescription, on_delete=models.CASCADE, related_name='medications')
+class TavsiyaEtilganDori(BaseModel):
+    dori_turi = models.ForeignKey(MedicationType, on_delete=models.CASCADE, related_name='medications_type')
     dori_nomi = models.ForeignKey(Medication, on_delete=models.CASCADE)
     kunlik_doza = models.DecimalField(max_digits=10, decimal_places=2)
     miqdori = models.PositiveIntegerField()
@@ -109,9 +124,40 @@ class TavsiyaEtilganDori(models.Model):
         today = timezone.now().date()
         return self.boshlanish <= today <= self.tugallanish
 
+class QabulQilishYakuniy(BaseModel):
+
+    preparatni_qabul_qilish_sanasi = models.DateField(
+        verbose_name="Preparatni qabul qilish sanasi",
+        default=timezone.now
+    )
+    preparatni_qabul_qilish_muddati = models.PositiveIntegerField(
+        verbose_name="Preparatni qabul qilish muddati (kun)",
+        default=1
+    )
+    oxirgi_qabul_qilish_sanasi = models.DateField(
+        verbose_name="Preparatni oxirgi qabul qilish sanasi",
+        null=True,
+        blank=True
+    )
+
+    # def save(self, *args, **kwargs):
+
+        # if not self.oxirgi_qabul_qilish_sanasi:
+        #     self.oxirgi_qabul_qilish_sanasi = (
+        #         self.preparatni_qabul_qilish_sanasi +
+        #         timezone.timedelta(days=self.preparatni_qabul_qilish_muddati)
+        #     )
+        # super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Medication Acceptance from {self.preparatni_qabul_qilish_sanasi}"
+
+    class Meta:
+        verbose_name = "Dori qabul qilish yanuniy malumot"
+        verbose_name_plural = "Dori qabul qilish yanuniy malumot"
 
 #  Notifications
-class Notification(models.Model):
+class Notification(BaseModel):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('sent', 'Sent'),
@@ -128,7 +174,6 @@ class Notification(models.Model):
     notification_type = models.CharField("Notification Type", max_length=10, choices=TYPE_CHOICES, default='entry')
     message = models.CharField("Ma'lumot", max_length=255)
     quantity = models.IntegerField("Miqdori", default=10)
-    created_at = models.DateTimeField("Sana", auto_now_add=True)
     status = models.CharField(
         "Status",
         max_length=20,
@@ -153,7 +198,7 @@ class Notification(models.Model):
         return f"{self.id} - {self.message}"
 
 
-class Attachment(models.Model):
+class Attachment(BaseModel):
 
     notification = models.ForeignKey(
         Notification,

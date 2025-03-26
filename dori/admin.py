@@ -25,7 +25,7 @@ from .models import (
     InventoryTransaction,
     MedicationDetails,
     MedicationPrescription,
-    TavsiyaEtilganDori, Notification, Attachment
+    TavsiyaEtilganDori, Notification, Attachment, QabulQilishYakuniy
 )
 
 # Register for MedicationType
@@ -35,11 +35,11 @@ class MedicationTypeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-# Inline for MedicationDetails
-class MedicationDetailsInline(admin.StackedInline):
-    model = MedicationDetails
-    can_delete = False
-    verbose_name_plural = 'Medication Details'
+# # Inline for MedicationDetails
+# class MedicationDetailsInline(admin.StackedInline):
+#     model = MedicationDetails
+#     can_delete = False
+#     verbose_name_plural = 'Medication Details'
 
 
 # Inline for InventoryTransaction
@@ -57,7 +57,7 @@ class MedicationAdmin(admin.ModelAdmin):
     list_filter = ('type', 'dosage_unit')
     search_fields = ('name', 'type__name')
     readonly_fields = ('total_input', 'total_output', 'balance')
-    inlines = [MedicationDetailsInline, InventoryTransactionInline]
+    inlines = [InventoryTransactionInline,] #MedicationDetailsInline, ]
     fieldsets = (
         (None, {
             'fields': ('type', 'name', 'dosage', 'dosage_unit')
@@ -88,13 +88,13 @@ class InventoryTransactionAdmin(admin.ModelAdmin):
     mark_as_unarchived.short_description = "Mark selected transactions as unarchived"
 
 
-# Inline for PrescribedMedication
-class PrescribedMedicationInline(admin.TabularInline):
-    model = TavsiyaEtilganDori
-    extra = 1
-    fields = ('dori_nomi', 'kunlik_dori', 'miqdori', 'qabul_qilish_muddati',
-              'boshlanish', 'tugallanish', 'seria_raqam', 'yaroqlilik_muddati')
-    autocomplete_fields = ('dori_nomi',)
+# # Inline for PrescribedMedication
+# class PrescribedMedicationInline(admin.TabularInline):
+#     model = TavsiyaEtilganDori
+#     extra = 1
+#     fields = ('dori_nomi', 'kunlik_doza', 'miqdori', 'qabul_qilish_muddati',
+#               'boshlanish', 'tugallanish', 'seria_raqam', 'yaroqlilik_muddati')
+#     autocomplete_fields = ('dori_nomi',)
 
 
 # Register for MedicationPrescription
@@ -105,7 +105,7 @@ class MedicationPrescriptionAdmin(admin.ModelAdmin):
     search_fields = ('prescription_number', 'patient__full_name', 'doctor', 'institution')
     raw_id_fields = ('patient',)
     date_hierarchy = 'prescription_date'
-    inlines = [PrescribedMedicationInline]
+    # inlines = [PrescribedMedicationInline]
     fieldsets = (
         (None, {
             'fields': ('patient', 'prescription_date', 'prescription_number')
@@ -119,21 +119,28 @@ class MedicationPrescriptionAdmin(admin.ModelAdmin):
 # Register for PrescribedMedication
 @admin.register(TavsiyaEtilganDori)
 class PrescribedMedicationAdmin(admin.ModelAdmin):
-    list_display = ('dori_nomi', 'bemor_dori', 'kunlik_doza', 'miqdori',
+    list_display = ('dori_nomi', 'dori_turi', 'kunlik_doza', 'miqdori',
                     'boshlanish', 'tugallanish', 'is_active')
     list_filter = ('boshlanish', 'tugallanish')
-    search_fields = ('dori__name', 'bemor_dori__prescription_number',
-                     'bemor_dori__patient__full_name')
-    raw_id_fields = ('bemor_dori', 'dori_nomi')
+    search_fields = ('dori__name', 'dori_turi__name',
+                     )
+    raw_id_fields = ('dori_nomi',)
     date_hierarchy = 'boshlanish'
     fieldsets = (
         (None, {
-            'fields': ('bemor_dori', 'dori_nomi', 'kunlik_doza', 'miqdori')
+            'fields': ('dori_turi', 'dori_nomi', 'kunlik_doza', 'miqdori')
         }),
         ('Administration', {
             'fields': ('qabul_qilish_muddati', 'boshlanish', 'tugallanish', 'seria_raqam', 'yaroqlilik_muddati')
         }),
     )
+
+@admin.register(QabulQilishYakuniy)
+class QabulQilishYakuniyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'preparatni_qabul_qilish_sanasi', 'preparatni_qabul_qilish_muddati', 'oxirgi_qabul_qilish_sanasi', 'created_at', 'updated_at')
+    list_filter = ('preparatni_qabul_qilish_sanasi', 'oxirgi_qabul_qilish_sanasi')
+    search_fields = ('preparatni_qabul_qilish_sanasi',)
+    ordering = ('-created_at',)
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

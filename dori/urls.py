@@ -1,11 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+from .models import QabulQilishYakuniy
 from .views import (
     MedicationTypeViewSet,
     MedicationViewSet,
     PatientViewSet,
     InventoryTransactionViewSet,
-    NotificationViewSet, AttachmentViewSet, MedicationPrescriptionDetailView, PrescribedMedicationListCreateView
+    NotificationViewSet, AttachmentViewSet, MedicationPrescriptionDetailView, PrescribedMedicationListCreateView,
+    DoriQabulQilishViewSet
 
 )
 
@@ -20,6 +23,8 @@ router.register(r'patients', PatientViewSet, basename='patient')
 router.register(r'inventory-transactions', InventoryTransactionViewSet, basename='inventorytransaction')
 router.register(r'notifications', NotificationViewSet)
 router.register(r'attachments', AttachmentViewSet)
+router.register(r'dori-qabul-qilish-yakuniy', DoriQabulQilishViewSet)
+
 
 # Define URL patterns
 urlpatterns = [
