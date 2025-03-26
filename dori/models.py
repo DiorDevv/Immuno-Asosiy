@@ -90,24 +90,24 @@ class MedicationPrescription(models.Model):
         ordering = ['-prescription_date']
 
 
-class PrescribedMedication(models.Model):
-    prescription = models.ForeignKey(MedicationPrescription, on_delete=models.CASCADE, related_name='medications')
-    medication = models.ForeignKey(Medication, on_delete=models.CASCADE)
-    daily_dose = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.PositiveIntegerField()
-    serial_number = models.CharField(max_length=20, blank=True)
-    administration_period = models.PositiveIntegerField(help_text="Duration in days")
-    start_date = models.DateField()
-    end_date = models.DateField()
-    intake_instructions = models.TextField(blank=True)
+class TavsiyaEtilganDori(models.Model):
+    bemor_dori = models.ForeignKey(MedicationPrescription, on_delete=models.CASCADE, related_name='medications')
+    dori_nomi = models.ForeignKey(Medication, on_delete=models.CASCADE)
+    kunlik_doza = models.DecimalField(max_digits=10, decimal_places=2)
+    miqdori = models.PositiveIntegerField()
+    seria_raqam = models.CharField(max_length=20, blank=True)
+    qabul_qilish_muddati = models.PositiveIntegerField(help_text="Duration in days")
+    boshlanish = models.DateField()
+    tugallanish = models.DateField()
+    yaroqlilik_muddati = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.medication.name} - {self.daily_dose}{self.medication.dosage_unit}"
+        return f"{self.dori_nomi.name} - {self.kunlik_doza}{self.dori_nomi.dosage_unit}"
 
     @property
     def is_active(self):
         today = timezone.now().date()
-        return self.start_date <= today <= self.end_date
+        return self.boshlanish <= today <= self.tugallanish
 
 
 #  Notifications
