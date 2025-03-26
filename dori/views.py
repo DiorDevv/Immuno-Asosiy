@@ -1,7 +1,7 @@
 
 from rest_framework import viewsets, status, filters, generics
 from rest_framework.decorators import action
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView
 from rest_framework.response import Response
 from django.db.models import Sum, F, Q, IntegerField, Subquery
 from django.http import HttpResponse, FileResponse
@@ -16,7 +16,7 @@ from .serializers import (
     InventoryTransactionSerializer,
     MedicationDetailsSerializer, NotificationDetailSerializer, NotificationListSerializer, AttachmentSerializer
 )
-from .models import MedicationPrescription, PrescribedMedication
+from .models import MedicationPrescription, TavsiyaEtilganDori
 from .serializers import MedicationPrescriptionSerializer, PrescribedMedicationSerializer
 from bemor.serializers import BemorSerializer
 
@@ -401,17 +401,17 @@ class MedicationPrescriptionDetailView(RetrieveUpdateDestroyAPIView):
 #     permission_classes = []
 #
 #
-# class PrescribedMedicationListCreateView(ListCreateAPIView):
-#     queryset = PrescribedMedication.objects.all()
-#     serializer_class = PrescribedMedicationSerializer
-#     permission_classes = []
-#
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class PrescribedMedicationListCreateView(ListAPIView):
+    queryset = TavsiyaEtilganDori.objects.all()
+    serializer_class = PrescribedMedicationSerializer
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 #
 #
 # class PrescribedMedicationDetailView(RetrieveUpdateDestroyAPIView):

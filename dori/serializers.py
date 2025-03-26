@@ -1,6 +1,6 @@
 from django.db.models import Sum
 from rest_framework import serializers
-from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, PrescribedMedication, \
+from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, TavsiyaEtilganDori, \
     MedicationPrescription
 
 
@@ -82,11 +82,11 @@ class PrescribedMedicationSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = PrescribedMedication
+        model = TavsiyaEtilganDori
         fields = [
-            'id', 'prescription', 'medication', 'medication_id', 'daily_dose',
-            'quantity', 'serial_number', 'administration_period', 'start_date',
-            'end_date', 'intake_instructions', 'is_active'
+            'id', 'bemor_dori', 'dori_nomi', 'dori_nomi_id', 'kunlik_doza',
+            'miqdori', 'seria_raqam', 'yaroqlilik_muddati', 'boshlanish',
+            'tugallanish', 'qabul_qilish_muddati', 'is_active'
         ]
         read_only_fields = ['is_active']  # Calculated property
 

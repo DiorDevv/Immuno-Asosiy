@@ -25,7 +25,7 @@ from .models import (
     InventoryTransaction,
     MedicationDetails,
     MedicationPrescription,
-    PrescribedMedication, Notification, Attachment
+    TavsiyaEtilganDori, Notification, Attachment
 )
 
 # Register for MedicationType
@@ -90,11 +90,11 @@ class InventoryTransactionAdmin(admin.ModelAdmin):
 
 # Inline for PrescribedMedication
 class PrescribedMedicationInline(admin.TabularInline):
-    model = PrescribedMedication
+    model = TavsiyaEtilganDori
     extra = 1
-    fields = ('medication', 'daily_dose', 'quantity', 'administration_period',
-              'start_date', 'end_date', 'serial_number', 'intake_instructions')
-    autocomplete_fields = ('medication',)
+    fields = ('dori_nomi', 'kunlik_dori', 'miqdori', 'qabul_qilish_muddati',
+              'boshlanish', 'tugallanish', 'seria_raqam', 'yaroqlilik_muddati')
+    autocomplete_fields = ('dori_nomi',)
 
 
 # Register for MedicationPrescription
@@ -117,21 +117,21 @@ class MedicationPrescriptionAdmin(admin.ModelAdmin):
 
 
 # Register for PrescribedMedication
-@admin.register(PrescribedMedication)
+@admin.register(TavsiyaEtilganDori)
 class PrescribedMedicationAdmin(admin.ModelAdmin):
-    list_display = ('medication', 'prescription', 'daily_dose', 'quantity',
-                    'start_date', 'end_date', 'is_active')
-    list_filter = ('start_date', 'end_date')
-    search_fields = ('medication__name', 'prescription__prescription_number',
-                     'prescription__patient__full_name')
-    raw_id_fields = ('prescription', 'medication')
-    date_hierarchy = 'start_date'
+    list_display = ('dori_nomi', 'bemor_dori', 'kunlik_doza', 'miqdori',
+                    'boshlanish', 'tugallanish', 'is_active')
+    list_filter = ('boshlanish', 'tugallanish')
+    search_fields = ('dori__name', 'bemor_dori__prescription_number',
+                     'bemor_dori__patient__full_name')
+    raw_id_fields = ('bemor_dori', 'dori_nomi')
+    date_hierarchy = 'boshlanish'
     fieldsets = (
         (None, {
-            'fields': ('prescription', 'medication', 'daily_dose', 'quantity')
+            'fields': ('bemor_dori', 'dori_nomi', 'kunlik_doza', 'miqdori')
         }),
         ('Administration', {
-            'fields': ('administration_period', 'start_date', 'end_date', 'serial_number', 'intake_instructions')
+            'fields': ('qabul_qilish_muddati', 'boshlanish', 'tugallanish', 'seria_raqam', 'yaroqlilik_muddati')
         }),
     )
 

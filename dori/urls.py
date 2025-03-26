@@ -5,7 +5,7 @@ from .views import (
     MedicationViewSet,
     PatientViewSet,
     InventoryTransactionViewSet,
-    NotificationViewSet, AttachmentViewSet, MedicationPrescriptionDetailView,
+    NotificationViewSet, AttachmentViewSet, MedicationPrescriptionDetailView, PrescribedMedicationListCreateView
 
 )
 
@@ -32,6 +32,11 @@ urlpatterns = [
         'medication-prescriptions/<int:pk>/',
         MedicationPrescriptionDetailView.as_view(),
         name='medicationprescription-detail'
+    ),
+path(
+        'tavsiya_etilgan_dori/',
+        PrescribedMedicationListCreateView.as_view(),
+        name='tavsiya_etilgan_dorilar'
     ),
 
     # URLs for PrescribedMedication views
