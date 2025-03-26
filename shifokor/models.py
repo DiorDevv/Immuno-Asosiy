@@ -2,9 +2,10 @@ import datetime
 
 from django.db.models import Model, CharField, IntegerField, DateField, OneToOneField, CASCADE
 
+from shared.models import BaseModel
 
 
-class ShifokorQoshish(Model):
+class ShifokorQoshish(BaseModel):
 
     GENDER_CHOICES = [
         ('M', 'Male'),
@@ -30,6 +31,6 @@ class Shifokorlar(Model):
     biriktirilgan_muassasa = CharField(null=True)
     ish_staji = IntegerField()
     oxirgi_malaka_oshirgan_joyi = CharField(max_length=150)
-    qayta_malaka_oshirish_vaqti = DateField(db_default=datetime.datetime.now())
+    qayta_malaka_oshirish_vaqti = DateField(auto_now=True)
     arxivga_olingan_sana = DateField(null=True)
 
