@@ -148,3 +148,4 @@ class Bemor(BaseModel):
 
 class DoriBerish(BaseModel):
     dori = models.ForeignKey('dori.TavsiyaEtilganDori', on_delete=models.CASCADE, null=True, blank=True)
+

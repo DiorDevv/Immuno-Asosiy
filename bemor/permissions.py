@@ -1,8 +1,9 @@
 from rest_framework.permissions import BasePermission
+from users.models import Role  # Role modelingizni import qiling
 
 class BemorPermission(BasePermission):
     """
-    Faqat 'vrach' ro‘liga ega foydalanuvchilar CRUD amallarini bajarishi mumkin.
+    Faqat VRACH ro‘liga ega foydalanuvchilar CRUD (Create, Update, Delete) amallarini bajarishi mumkin.
     Boshqa foydalanuvchilar faqat GET (Read) imkoniyatiga ega bo‘ladi.
     """
 
@@ -13,8 +14,10 @@ class BemorPermission(BasePermission):
         if not user or not user.is_authenticated:
             return request.method in ["GET", "HEAD", "OPTIONS"]  # ❌ Faqat o‘qish mumkin
 
-        # Foydalanuvchi "vrach" ro‘liga egami?
-        if hasattr(user, "role_user") and user.role_user.lower() == "vrach":
+        # Foydalanuvchining roli "VRACH" ekanligini tekshirish
+        user_role = getattr(user, "role_user", "").upper()
+
+        if user_role == Role.VRACH:
             return True  # ✅ CRUD amallariga ruxsat beriladi
 
         return request.method in ["GET", "HEAD", "OPTIONS"]  # ❌ Faqat o‘qish mumkin
