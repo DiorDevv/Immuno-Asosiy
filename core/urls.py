@@ -27,6 +27,7 @@ urlpatterns = [
     path('users/api/', include("users.urls")),
     path('bemor/api/', include("bemor.urls")),
     path('dori/api/', include('dori.urls')),
+    path('ariza/api', include('ariza.urls')),
     path('shifokor/api/', include('shifokor.urls')),
     path('seans/api/', include('seans.urls')),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

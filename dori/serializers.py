@@ -85,7 +85,7 @@ class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
     class Meta:
         model = TavsiyaEtilganDori
         fields = [
-            'id', 'bemor_dori', 'dori_nomi', 'kunlik_doza',
+            'id','medication_id','medication', 'dori_turi', 'dori_nomi', 'kunlik_doza',
             'miqdori', 'seria_raqam', 'yaroqlilik_muddati', 'boshlanish',
             'tugallanish', 'qabul_qilish_muddati', 'is_active'
         ]

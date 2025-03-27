@@ -108,13 +108,13 @@ class MedicationPrescription(BaseModel):
 class TavsiyaEtilganDori(BaseModel):
     dori_turi = models.ForeignKey(MedicationType, on_delete=models.CASCADE, related_name='medications_type')
     dori_nomi = models.ForeignKey(Medication, on_delete=models.CASCADE)
-    kunlik_doza = models.DecimalField(max_digits=10, decimal_places=2)
+    kunlik_doza = models.FloatField()
     miqdori = models.PositiveIntegerField()
     seria_raqam = models.CharField(max_length=20, blank=True)
     qabul_qilish_muddati = models.PositiveIntegerField(help_text="Duration in days")
     boshlanish = models.DateField()
     tugallanish = models.DateField()
-    yaroqlilik_muddati = models.TextField(blank=True)
+    yaroqlilik_muddati = models.PositiveIntegerField()
 
     def __str__(self):
         return f"{self.dori_nomi.name} - {self.kunlik_doza}{self.dori_nomi.dosage_unit}"
