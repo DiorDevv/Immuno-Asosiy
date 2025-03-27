@@ -14,7 +14,6 @@ class MedicationType(BaseModel):
         verbose_name = "Dori Turi"
         verbose_name_plural = "Dori Turlari"
 
-
     def __str__(self):
         return self.name
 
