@@ -2,7 +2,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser, Role
+from .models import CustomUser
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError

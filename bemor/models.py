@@ -125,13 +125,11 @@ class Bemor(BaseModel):
     arxiv_izoh = models.TextField(null=True, blank=True)
 
     def clean(self):
-        """ Arxivga olish sanasi noto‘g‘ri kiritilganligini tekshirish """
         if self.arxivga_olingan_sana:
             if not self.created_at or self.arxivga_olingan_sana < self.created_at:
                 raise ValidationError("Arxivga olish sanasi noto‘g‘ri!")
 
     def save(self, *args, **kwargs):
-        """ Agar bemor arxivga o'tkazilsa, sabab va izoh kiritilganligini tekshirish """
         if self.arxivga_olingan_sana:
             if not self.arxiv_sababi:
                 raise ValidationError("Arxivga o'tkazish sababini tanlash kerak!")

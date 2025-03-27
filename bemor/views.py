@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny
 
 from .permissions import BemorPermission
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
-    BemorSerializer, TavsiyaEtilganDoriSerializer
+    BemorSerializer, TavsiyaEtilganDoriiSerializer
 from rest_framework import permissions
 from rest_framework import viewsets, filters
 from rest_framework.exceptions import ValidationError
@@ -222,5 +222,5 @@ class BemorPDFDownloadView(APIView):
 
 class TavsiyaEtilganDoriViewSet(viewsets.ModelViewSet):
     queryset = TavsiyaEtilganDori.objects.all().select_related('dori_turi', 'dori_nomi')
-    serializer_class = TavsiyaEtilganDoriSerializer
+    serializer_class = TavsiyaEtilganDoriiSerializer
     permission_classes = []
