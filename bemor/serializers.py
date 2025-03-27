@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 
+from dori.models import TavsiyaEtilganDori, MedicationType, Medication
 from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman, DoriBerish
 import re
 from django.utils import timezone
@@ -170,35 +171,25 @@ class BemorSerializer(serializers.ModelSerializer):
         return data
 
 
-class DoriBerishSerializer(serializers.ModelSerializer):
-    patient = serializers.SerializerMethodField()
-    dori = serializers.SerializerMethodField()
+class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
+    dori_turi = serializers.PrimaryKeyRelatedField(queryset=MedicationType.objects.all(), required=True)
+    dori_nomi = serializers.PrimaryKeyRelatedField(queryset=Medication.objects.all(), required=True)
 
     class Meta:
-        model = DoriBerish
-        fields = ['id', 'dori', 'patient']
+        model = TavsiyaEtilganDori
+        fields = '__all__'
 
-    def get_patient(self, obj):
-        bemor = getattr(obj.dori, 'bemor_dori', None)
-        if bemor and bemor.patient:
-            return {
-                "ism": bemor.patient.ism,
-                "familiya": bemor.patient.familiya
-            }
-        return {}
+    def to_representation(self, instance):
+        """GET request uchun dori_turi va dori_nomi obyekt sifatida qaytishi"""
+        representation = super().to_representation(instance)
+        representation['dori_turi'] = {
+            "id": instance.dori_turi.id,
+            "name": instance.dori_turi.name
+        } if instance.dori_turi else None
 
-    def get_dori(self, obj):
-        if obj.dori:
-            return {
-                "id": obj.dori.id,
-                "dori_nomi": obj.dori.dori_nomi.nomi if obj.dori.dori_nomi else "Noma'lum",
-                "kunlik_doza": str(obj.dori.kunlik_doza),
-                "miqdori": obj.dori.miqdori,
-                "seria_raqam": obj.dori.seria_raqam,
-                "qabul_qilish_muddati": obj.dori.qabul_qilish_muddati,
-                "boshlanish": obj.dori.boshlanish.strftime("%Y-%m-%d") if obj.dori.boshlanish else None,
-                "tugallanish": obj.dori.tugallanish.strftime("%Y-%m-%d") if obj.dori.tugallanish else None,
-                "yaroqlilik_muddati": obj.dori.yaroqlilik_muddati.strftime(
-                    "%Y-%m-%d") if obj.dori.yaroqlilik_muddati else None
-            }
-        return {}
+        representation['dori_nomi'] = {
+            "id": instance.dori_nomi.id,
+            "name": instance.dori_nomi.name
+        } if instance.dori_nomi else None
+
+        return representation

@@ -4,12 +4,14 @@ from rest_framework import status, serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from dori.models import TavsiyaEtilganDori
 from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor, DoriBerish
 from rest_framework.permissions import AllowAny
 
 from .permissions import BemorPermission
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
-    BemorSerializer, DoriBerishSerializer
+    BemorSerializer, TavsiyaEtilganDoriSerializer
 from rest_framework import permissions
 from rest_framework import viewsets, filters
 from rest_framework.exceptions import ValidationError
@@ -218,8 +220,7 @@ class BemorPDFDownloadView(APIView):
         return generate_bemor_pdf(pk)
 
 
-
-class DoriBerishViewSet(viewsets.ModelViewSet):
-    queryset = DoriBerish.objects.select_related('dori__bemor_dori__patient', 'dori__dori_nomi').all()
-    serializer_class = DoriBerishSerializer
+class TavsiyaEtilganDoriViewSet(viewsets.ModelViewSet):
+    queryset = TavsiyaEtilganDori.objects.all().select_related('dori_turi', 'dori_nomi')
+    serializer_class = TavsiyaEtilganDoriSerializer
     permission_classes = []
