@@ -119,7 +119,7 @@ class MedicationPrescriptionAdmin(admin.ModelAdmin):
 # Register for PrescribedMedication
 @admin.register(TavsiyaEtilganDori)
 class PrescribedMedicationAdmin(admin.ModelAdmin):
-    list_display = ('dori_nomi', 'dori_turi', 'kunlik_doza', 'miqdori',
+    list_display = ('dori_nomi', 'bemor', 'kunlik_doza', 'miqdori',
                     'boshlanish', 'tugallanish', 'is_active')
     list_filter = ('boshlanish', 'tugallanish')
     search_fields = ('dori__name', 'dori_turi__name',
@@ -128,7 +128,7 @@ class PrescribedMedicationAdmin(admin.ModelAdmin):
     date_hierarchy = 'boshlanish'
     fieldsets = (
         (None, {
-            'fields': ('dori_turi', 'dori_nomi', 'kunlik_doza', 'miqdori')
+            'fields': ('bemor', 'dori_nomi', 'kunlik_doza', 'miqdori')
         }),
         ('Administration', {
             'fields': ('qabul_qilish_muddati', 'boshlanish', 'tugallanish', 'seria_raqam', 'yaroqlilik_muddati')
