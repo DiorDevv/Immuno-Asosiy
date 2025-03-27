@@ -30,7 +30,7 @@ from .utils import generate_bemor_pdf
 class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
     serializer_class = BemorQoshishSerializer
-    permission_classes = []
+    permission_classes = [BemorPermission, ]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -92,7 +92,7 @@ class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
 class BemorViewSet(viewsets.ModelViewSet):
     queryset = Bemor.objects.all().order_by('-created_at')
     serializer_class = BemorSerializer
-    permission_classes = [AllowAny, ]
+    permission_classes = [BemorPermission, ]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']
     ordering_fields = ['created_at', 'arxivga_olingan_sana']

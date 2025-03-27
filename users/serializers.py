@@ -1,17 +1,16 @@
 from django.contrib.auth.hashers import make_password
 from django.utils.crypto import get_random_string
-from .models import Role, CustomUser
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import CustomUser, Role
+from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User as DjangoUser
+from rest_framework.exceptions import ValidationError
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=6, required=True)
+    password = serializers.CharField(write_only=True, min_length=8, required=True)
     token = serializers.SerializerMethodField()
-    role_user = serializers.ChoiceField(choices=Role.choices, required=True)
 
     class Meta:
         model = CustomUser
@@ -21,11 +20,6 @@ class SignUpSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if CustomUser.objects.filter(username=value).exists():
             raise serializers.ValidationError("Bu username allaqachon mavjud.")
-        return value
-
-    def validate_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("Parol kamida 8 ta belgidan iborat bo‘lishi kerak.")
         return value
 
     def create(self, validated_data):
@@ -60,14 +54,12 @@ class LoginSerializer(serializers.Serializer):
         username = data.get('username')
         password = data.get('password')
 
-        user = CustomUser.objects.filter(username=username).first()
-        print(user)
+        user = authenticate(username=username, password=password)
         if user is None:
             raise ValidationError({
                 'success': False,
-                'message': _("Kiritgan login yoki parolingiz noto‘g‘ri. Iltimos qayta tekshirib ko‘ring!")
+                'message': _("Kiritgan login yoki parolingiz noto‘g‘ri!")
             })
-
         if user.auth_status.lower() == "new":
             user.auth_status = "done"
             user.save()
@@ -93,7 +85,7 @@ class LoginSerializer(serializers.Serializer):
             "auth_status": user.auth_status,
             "role_user": user.role_user,
             "token": self.get_token(user)["access"],
-            'refresh_token': self.get_token(user)["refresh"],
+            "refresh_token": self.get_token(user)["refresh"],
         }
 
     def get_token(self, user):
@@ -102,27 +94,3 @@ class LoginSerializer(serializers.Serializer):
             "access": str(refresh.access_token),
             "refresh": str(refresh)
         }
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["token"] = self.get_token(self.user)["access"]
-        data["full_name"] = self.user.get_full_name()
-        data["auth_status"] = self.user.auth_status
-        data["role_user"] = self.role_user
-        return data
-
-#
-# class LoginRefreshSerializer(TokenRefreshSerializer):
-#     def validate(self, attrs):
-#         data = super().validate(attrs)
-#         access_token_instance = AccessToken(data['access'])
-#
-#         # user_id ni UUID ga aylantirish
-#         try:
-#             user_id = uuid.UUID(str(access_token_instance['user_id']))
-#         except ValueError:
-#             raise serializers.ValidationError("User ID noto‘g‘ri formatda")
-#
-#         user = get_object_or_404(User, id=user_id)
-#         update_last_login(None, user)
-#         return data

@@ -1,9 +1,9 @@
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework.generics import CreateAPIView, UpdateAPIView
-from rest_framework import generics, permissions
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.generics import CreateAPIView
+from rest_framework import permissions
+from .models import CustomUser
+from .serializers import SignUpSerializer, LoginSerializer
 
-from users.models import CustomUser
-from users.serializers import SignUpSerializer, LoginSerializer #LoginRefreshSerializer
 
 class CreateUserView(CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -13,7 +13,3 @@ class CreateUserView(CreateAPIView):
 
 class LoginAPIView(TokenObtainPairView):
     serializer_class = LoginSerializer
-#
-#
-# class LoginRefreshView(TokenRefreshView):
-#     serializer_class = LoginRefreshSerializer
