@@ -78,6 +78,7 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         medications_data = validated_data.pop('medications', [])
         application = Application.objects.create(**validated_data)
 
+
         for medication_data in medications_data:
             ApplicationMedication.objects.create(application=application, **medication_data)
 
