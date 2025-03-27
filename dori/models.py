@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, CASCADE
 from django.utils import timezone
 
 from bemor.models import Bemor
@@ -106,7 +106,8 @@ class MedicationPrescription(BaseModel):
         verbose_name_plural = "Qabul qilish bo'yicha malumotlar"
 
 class TavsiyaEtilganDori(BaseModel):
-    dori_turi = models.ForeignKey(MedicationType, on_delete=models.CASCADE, related_name='medications_type')
+    # dori_turi = models.ForeignKey(MedicationType, on_delete=models.CASCADE, related_name='medications_type')
+    bemor = models.ForeignKey(Bemor, on_delete=CASCADE, related_name='tavsiya_etilgan_dori')
     dori_nomi = models.ForeignKey(Medication, on_delete=models.CASCADE)
     kunlik_doza = models.FloatField()
     miqdori = models.PositiveIntegerField()
@@ -212,3 +213,11 @@ class Attachment(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+
+
+
+
+
+

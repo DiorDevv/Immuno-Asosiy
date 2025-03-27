@@ -85,7 +85,7 @@ class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
     class Meta:
         model = TavsiyaEtilganDori
         fields = [
-            'id','medication_id','medication', 'dori_turi', 'dori_nomi', 'kunlik_doza',
+            'id','medication_id','medication', 'bemor', 'dori_nomi', 'kunlik_doza',
             'miqdori', 'seria_raqam', 'yaroqlilik_muddati', 'boshlanish',
             'tugallanish', 'qabul_qilish_muddati', 'is_active'
         ]
@@ -169,7 +169,7 @@ class NotificationDetailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     # Medication details
-    dori_turi = serializers.CharField(source='medication.get_type_display', read_only=True)
+    bemor = serializers.CharField(source='medication.get_type_display', read_only=True)
     dori_nomi = serializers.CharField(source='medication.name', read_only=True)
     dori_dozasi = serializers.FloatField(source='medication.dosage', read_only=True)
     miqdori = serializers.IntegerField(source='medication.quantity', read_only=True)
@@ -192,7 +192,7 @@ class NotificationDetailSerializer(serializers.ModelSerializer):
         model = Notification
         fields = [
             'id', 'message', 'sana', 'status', 'status_display',
-            'dori_turi', 'dori_nomi', 'dori_dozasi', 'miqdori',
+            'bemor', 'dori_nomi', 'dori_dozasi', 'miqdori',
             'seriya_raqami', 'ishlab_chiqarilgan_sana', 'yaroqlilik_muddati',
             'has_attachments'
         ]

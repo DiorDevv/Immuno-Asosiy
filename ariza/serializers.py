@@ -3,7 +3,6 @@ from rest_framework import serializers
 from dori.models import MedicationType
 from .models import *
 
-
 class TransplantCenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransplantCenter
