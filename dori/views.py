@@ -17,7 +17,7 @@ from .serializers import (
     MedicationDetailsSerializer, NotificationDetailSerializer, NotificationListSerializer, AttachmentSerializer
 )
 from .models import MedicationPrescription, TavsiyaEtilganDori
-from .serializers import MedicationPrescriptionSerializer, TavsiyaEtilganDoriSerializer
+from .serializers import MedicationPrescriptionSerializer, TavsiyaEtilganDoriModelSerializer
 from bemor.serializers import BemorSerializer
 
 from rest_framework import viewsets, filters, status
@@ -417,7 +417,7 @@ class MedicationPrescriptionDetailView(RetrieveUpdateDestroyAPIView):
 #
 class PrescribedMedicationListCreateView(ListAPIView):
     queryset = TavsiyaEtilganDori.objects.all()
-    serializer_class = TavsiyaEtilganDoriSerializer
+    serializer_class = TavsiyaEtilganDoriModelSerializer
     permission_classes = []
 
     def post(self, request, *args, **kwargs):

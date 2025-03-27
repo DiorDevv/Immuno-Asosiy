@@ -74,7 +74,7 @@ class MedicationSerializer(serializers.ModelSerializer):
     #     return obj.total_input-obj.total_output
 
 
-class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
+class TavsiyaEtilganDoriModelSerializer(serializers.ModelSerializer):
     medication = MedicationSerializer(read_only=True)  # Nested serializer for medication details
     medication_id = serializers.PrimaryKeyRelatedField(
         queryset=Medication.objects.all(),
@@ -92,7 +92,7 @@ class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
         read_only_fields = ['is_active']  # Calculated property
 
 class MedicationPrescriptionSerializer(serializers.ModelSerializer):
-    medications = TavsiyaEtilganDoriSerializer(many=True, read_only=True)  # Nested medications
+    medications = TavsiyaEtilganDoriModelSerializer(many=True, read_only=True)  # Nested medications
     patient = serializers.StringRelatedField()  # Display patient full_name
 
     class Meta:
