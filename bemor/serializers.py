@@ -171,7 +171,7 @@ class BemorSerializer(serializers.ModelSerializer):
         return data
 
 
-class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
+class TavsiyaEtilganDoriiSerializer(serializers.ModelSerializer):
     dori_turi = serializers.PrimaryKeyRelatedField(queryset=MedicationType.objects.all(), required=True)
     dori_nomi = serializers.PrimaryKeyRelatedField(queryset=Medication.objects.all(), required=True)
 
@@ -180,7 +180,6 @@ class TavsiyaEtilganDoriSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
-        """GET request uchun dori_turi va dori_nomi obyekt sifatida qaytishi"""
         representation = super().to_representation(instance)
         representation['dori_turi'] = {
             "id": instance.dori_turi.id,
