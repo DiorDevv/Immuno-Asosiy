@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db import models
 from django.db.models import Sum, CASCADE
 from django.utils import timezone
@@ -18,15 +20,25 @@ class MedicationType(BaseModel):
         return self.name
 
 
+from django.db import models
+from django.db.models import Sum
+
 class Medication(BaseModel):
-    type = models.ForeignKey(MedicationType, verbose_name='Dori' ,on_delete=models.CASCADE, related_name='medications')
+    type = models.ForeignKey(
+        MedicationType,
+        verbose_name='Dori',
+        on_delete=models.CASCADE,
+        related_name='medications',
+        null=True,  # Agar type ba'zan bo'sh bo'lishi mumkin bo'lsa
+        blank=True
+    )
     name = models.CharField(max_length=100)
-    dosage = models.DecimalField(max_digits=10, decimal_places=2)
+    dosage = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     dosage_unit = models.CharField(max_length=10, default='mg')
 
     def __str__(self):
-        return f"{self.name} {self.dosage}{self.dosage_unit}"
-
+        dosage_str = f"{self.dosage}{self.dosage_unit}" if self.dosage is not None else "No dosage"
+        return f"{self.name} {dosage_str}"
 
     def total_input(self):
         return self.inventory_transactions.filter(transaction_type='INPUT').aggregate(
@@ -44,7 +56,8 @@ class Medication(BaseModel):
 
     class Meta:
         verbose_name = "Dori"
-        verbose_name_plural = "Dorilari"
+        verbose_name_plural = "Dorilar"
+
 
 
 
@@ -127,7 +140,7 @@ class TavsiyaEtilganDori(BaseModel):
 
 class QabulQilishYakuniy(BaseModel):
 
-    preparatni_qabul_qilish_sanasi = models.DateField(
+    preparatni_qabul_qilish_sanasi = models.DateTimeField(
         verbose_name="Preparatni qabul qilish sanasi",
         default=timezone.now
     )
@@ -135,28 +148,26 @@ class QabulQilishYakuniy(BaseModel):
         verbose_name="Preparatni qabul qilish muddati (kun)",
         default=1
     )
-    oxirgi_qabul_qilish_sanasi = models.DateField(
+    oxirgi_qabul_qilish_sanasi = models.DateTimeField(
         verbose_name="Preparatni oxirgi qabul qilish sanasi",
-        null=True,
-        blank=True
+
     )
 
-    # def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
 
-        # if not self.oxirgi_qabul_qilish_sanasi:
-        #     self.oxirgi_qabul_qilish_sanasi = (
-        #         self.preparatni_qabul_qilish_sanasi +
-        #         timezone.timedelta(days=self.preparatni_qabul_qilish_muddati)
-        #     )
-        # super().save(*args, **kwargs)
+        if not self.oxirgi_qabul_qilish_sanasi:
+            self.oxirgi_qabul_qilish_sanasi = (
+                self.preparatni_qabul_qilish_sanasi +
+                timezone.timedelta(days=self.preparatni_qabul_qilish_muddati)
+            )
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Medication Acceptance from {self.preparatni_qabul_qilish_sanasi}"
 
     class Meta:
-        verbose_name = "Dori qabul qilish yanuniy malumot"
-        verbose_name_plural = "Dori qabul qilish yanuniy malumot"
-
+        verbose_name = "Dori qabul qilish yakuniy ma'lumot"
+        verbose_name_plural = "Dori qabul qilish yakuniy ma'lumotlar"
 #  Notifications
 class Notification(BaseModel):
     STATUS_CHOICES = (
@@ -201,12 +212,12 @@ class Notification(BaseModel):
 
 class Attachment(BaseModel):
 
-    notification = models.ForeignKey(
-        Notification,
-        on_delete=models.CASCADE,
-        related_name='attachments',
-        verbose_name="Notification"
-    )
+    # notification = models.ForeignKey(
+    #     Notification,
+    #     on_delete=models.CASCADE,
+    #     related_name='attachments',
+    #     verbose_name="Notification"
+    # )
     file = models.FileField("File", upload_to='notifications/')
     name = models.CharField("Name", max_length=255)
     uploaded_at = models.DateTimeField("Uploaded At", auto_now_add=True)

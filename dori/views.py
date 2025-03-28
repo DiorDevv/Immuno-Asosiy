@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from django.db.models import Sum, F, Q, IntegerField, Subquery
 from django.http import HttpResponse, FileResponse
 import pandas as pd
+from rest_framework.parsers import MultiPartParser, FormParser
+
 from datetime import datetime
 from django.utils.timezone import make_aware
 from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, Notification, Attachment
@@ -186,6 +188,7 @@ class AttachmentViewSet(viewsets.ModelViewSet):
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
     permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
 
     # Limit to only GET and POST methods
     http_method_names = ['get', 'post']
