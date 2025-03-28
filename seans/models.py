@@ -1,19 +1,21 @@
 from django.db.models import Model, FloatField, ForeignKey, CASCADE, DateField, CharField, BooleanField, FileField, \
     TextField, IntegerField
 
+from shared.models import BaseModel
 
-class AnalizNatijalar(Model):
-    Gemoglabin = FloatField()
-    Trombosit = FloatField()
-    Leykosit = FloatField()
-    Eritrosit = FloatField()
-    Limfosit = FloatField()
+
+class AnalizNatijalar(BaseModel):
+    gemoglabin = FloatField()
+    trombosit = FloatField()
+    leykosit = FloatField()
+    eritrosit = FloatField()
+    limfosit = FloatField()
     korik = ForeignKey('Korik', CASCADE, related_name='analiz_natijalari')
 
 
 
 
-class Korik(Model):
+class Korik(BaseModel):
     bemor = ForeignKey('bemor.Bemor', CASCADE, related_name='seanslar')
     korik_otkazilgan_sana = DateField(auto_now=True)
     murojat_turi = CharField(max_length=255)
@@ -24,9 +26,13 @@ class Korik(Model):
     biriktirilgan_fayllar = FileField()
     description = TextField()
 
-class TavsiyaQilinganDorilar(Model):
+    def __str__(self):
+        return f"{self.id}"
+
+
+class TavsiyaQilinganDorilar(BaseModel):
     dori = ForeignKey('dori.MedicationType', CASCADE)
-    korik = ForeignKey('Korik', CASCADE)
+    korik = ForeignKey('Korik', CASCADE, 'korik_dorilari')
     dozasi = IntegerField()
 
 

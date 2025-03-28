@@ -20,10 +20,10 @@ class ShifokorQoshish(BaseModel):
     tugilgan_sana = DateField()
 
     def __str__(self):
-        return f"{self.ismi} {self.familya} - {self.jshshir}"
+        return f"{self.ismi} {self.familya} {self.jshshir}"
 
 
-class Shifokorlar(Model):
+class Shifokorlar(BaseModel):
     shifokor = OneToOneField('ShifokorQoshish', CASCADE, related_name='shifokor')
     lavozimi = CharField(max_length=100)
     mutaxasislik_toifasi = CharField(max_length=100)
@@ -34,3 +34,6 @@ class Shifokorlar(Model):
     qayta_malaka_oshirish_vaqti = DateField(auto_now=True)
     arxivga_olingan_sana = DateField(null=True)
 
+
+    def __str__(self):
+        return f"{self.shifokor}"
