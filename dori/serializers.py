@@ -133,7 +133,9 @@ class QabulQilishYakuniySerializer(serializers.ModelSerializer):
             'preparatni_qabul_qilish_muddati',
             'oxirgi_qabul_qilish_sanasi'
         ]
-        read_only_fields = ['oxirgi_qabul_qilish_sanasi']
+        extra_kwargs = {
+            'oxirgi_qabul_qilish_sanasi': {'required': False}
+        }
 
 # Notifications
 
@@ -150,7 +152,7 @@ from .models import Medication, Notification, Attachment
 class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
-        fields = ['id', 'file', 'name', 'uploaded_at']
+        fields = '__all__'
 
 
 class NotificationListSerializer(serializers.ModelSerializer):
