@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ExportMixin
 from .models import Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, BemorQoshish, Viloyat, Tuman, Manzil, \
-    ArxivSababi, DoriBerish
+    ArxivSababi, DoriBerish, ArxivBemor
 
 
 class BemorInline(admin.TabularInline):  # Bemorlarni boshqa adminlarda ichki jadval sifatida ko‘rsatish
