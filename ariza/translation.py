@@ -1,14 +1,11 @@
-from modeltranslation.translator import Translator
-
 from modeltranslation.translator import register, TranslationOptions
-from ariza.models import TransplantCenter, ToWhom, ApplicationStatus, MedicationTypeApp, MedicationApp, Application, \
+from .models import TransplantCenter, ToWhom, ApplicationStatus, MedicationTypeApp, MedicationApp, Application, \
     ApplicationMedication
-from dori.models import MedicationType
 
 
 @register(TransplantCenter)
 class ArizaTranslation(TranslationOptions):
-    fields = ['name', ]
+    fields = ('name',)
 
 @register(ToWhom)
 class ToWhomTranslation(TranslationOptions):

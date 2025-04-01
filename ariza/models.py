@@ -61,7 +61,7 @@ class Application(models.Model): # Ariza
     director_name = models.CharField(max_length=255)
     to_center = models.ForeignKey(TransplantCenter, on_delete=models.CASCADE, related_name='received_applications')
     position = models.ForeignKey(ToWhom, on_delete=models.CASCADE)
-    date = models.DateField(default=timezone.now)
+    date = models.DateField()
     status = models.ForeignKey(ApplicationStatus, on_delete=models.CASCADE, related_name='aplication')
     # main_center = models.CharField(max_length=255, blank=True, null=True)
     # start_date = models.DateField(null=True, blank=True)

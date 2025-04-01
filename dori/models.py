@@ -1,4 +1,5 @@
 from datetime import timedelta
+from email.policy import default
 
 from django.db import models
 from django.db.models import Sum, CASCADE
@@ -70,7 +71,7 @@ class InventoryTransaction(BaseModel):
     medication = models.ForeignKey(Medication, on_delete=models.CASCADE, related_name='inventory_transactions')
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
     quantity = models.PositiveIntegerField()
-    date = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField()
     notes = models.TextField(blank=True, null=True)
     archived = models.BooleanField(default=False)
     patient = models.ForeignKey(Bemor, on_delete=models.SET_NULL, null=True, blank=True,
@@ -103,7 +104,7 @@ class MedicationDetails(BaseModel):
 
 class MedicationPrescription(BaseModel):
     patient = models.ForeignKey(Bemor, on_delete=models.CASCADE, related_name='prescriptions')
-    prescription_date = models.DateField(default=timezone.now)
+    prescription_date = models.DateField()
     prescription_number = models.CharField(max_length=20)
     institution = models.CharField(max_length=100)
     doctor = models.CharField(max_length=100)
@@ -142,7 +143,7 @@ class QabulQilishYakuniy(BaseModel):
 
     preparatni_qabul_qilish_sanasi = models.DateTimeField(
         verbose_name="Preparatni qabul qilish sanasi",
-        default=timezone.now
+
     )
     preparatni_qabul_qilish_muddati = models.PositiveIntegerField(
         verbose_name="Preparatni qabul qilish muddati (kun)",
