@@ -120,21 +120,21 @@ class Bemor(BaseModel):
     biriktirilgan_file = models.FileField(upload_to='media/biriktirilgan/%Y/%m/%d', null=True, blank=True)
     qoshimcha_malumotlar = models.TextField(null=True, blank=True)
 
-    arxivga_olingan_sana = models.DateTimeField(null=True, blank=True)
-    arxiv_sababi = models.ForeignKey(ArxivSababi, on_delete=models.SET_NULL, null=True, blank=True)
-    arxiv_izoh = models.TextField(null=True, blank=True)
+    # arxivga_olingan_sana = models.DateTimeField(null=True, blank=True)
+    # arxiv_sababi = models.ForeignKey(ArxivSababi, on_delete=models.SET_NULL, null=True, blank=True)
+    # arxiv_izoh = models.TextField(null=True, blank=True)
 
-    def clean(self):
-        if self.arxivga_olingan_sana:
-            if not self.created_at or self.arxivga_olingan_sana < self.created_at:
-                raise ValidationError("Arxivga olish sanasi noto‘g‘ri!")
-
-    def save(self, *args, **kwargs):
-        if self.arxivga_olingan_sana:
-            if not self.arxiv_sababi:
-                raise ValidationError("Arxivga o'tkazish sababini tanlash kerak!")
-            self.bemor_holati = BemorningHolati.objects.get_or_create(nomi="Arxivda")[0]
-        super().save(*args, **kwargs)
+    # def clean(self):
+    #     if self.arxivga_olingan_sana:
+    #         if not self.created_at or self.arxivga_olingan_sana < self.created_at:
+    #             raise ValidationError("Arxivga olish sanasi noto‘g‘ri!")
+    #
+    # def save(self, *args, **kwargs):
+    #     if self.arxivga_olingan_sana:
+    #         if not self.arxiv_sababi:
+    #             raise ValidationError("Arxivga o'tkazish sababini tanlash kerak!")
+    #         self.bemor_holati = BemorningHolati.objects.get_or_create(nomi="Arxivda")[0]
+    #     super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Bemor"
@@ -144,6 +144,14 @@ class Bemor(BaseModel):
         return f"{self.bemor.ism} {self.bemor.familiya} - {self.bemor.JSHSHIR}"
 
 
+class ArxivBemor(models.Model):
+    bemor = models.ForeignKey(Bemor, on_delete=models.CASCADE)
+    arxiv_sababi = models.ForeignKey(ArxivSababi, on_delete=models.SET_NULL, null=True, blank=True)
+    qoshimcha_malumotlar = models.TextField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Bemor Arxivi"
+
+
 class DoriBerish(BaseModel):
     dori = models.ForeignKey('dori.TavsiyaEtilganDori', on_delete=models.CASCADE, null=True, blank=True)
-

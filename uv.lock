@@ -79,6 +79,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-modeltranslation"
+version = "0.19.13"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/44/e1/54a2f2cff0bf6c5798a0185f4b962d680999a8f0207a61f8aebb75ff8226/django_modeltranslation-0.19.13.tar.gz", hash = "sha256:df2516fdfb6a865fd1dfdda74e549d437d8ca148c1d435663db36edb6863f34e", size = 76720 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/a9/87ddfca789c95e8aaa7d5481d00184046cad925f943aeaee31dd21e62f0b/django_modeltranslation-0.19.13-py3-none-any.whl", hash = "sha256:69b7dc9a8bae152ab84caf969a5ad478f588f4d9f8345545d4f20f66eeb51ef6", size = 53996 },
+]
+
+[[package]]
 name = "djangorestframework"
 version = "3.15.2"
 source = { registry = "https://pypi.org/simple" }
@@ -501,6 +513,7 @@ dependencies = [
     { name = "django" },
     { name = "django-filter" },
     { name = "django-import-export" },
+    { name = "django-modeltranslation" },
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
     { name = "drf-spectacular" },
@@ -521,6 +534,7 @@ requires-dist = [
     { name = "django", specifier = "==5.1.7" },
     { name = "django-filter", specifier = ">=25.1" },
     { name = "django-import-export", specifier = "==4.3.7" },
+    { name = "django-modeltranslation", specifier = ">=0.19.13" },
     { name = "djangorestframework", specifier = "==3.15.2" },
     { name = "djangorestframework-simplejwt", specifier = "==5.5.0" },
     { name = "drf-spectacular", specifier = "~=0.28.0" },
