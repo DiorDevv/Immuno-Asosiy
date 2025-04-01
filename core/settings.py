@@ -4,6 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,6 +33,7 @@ INSTALLED_APPS = [
     #    package
     'rest_framework',
     'rest_framework_simplejwt',
+    'modeltranslation',
     # 'rest_framework.authtoken',
     'import_export',
     'drf_yasg',
@@ -177,7 +179,7 @@ AUTHENTICATION_BACKENDS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'uz'
 
 TIME_ZONE = 'UTC'
 
@@ -185,8 +187,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+LANGUAGES = [
+    ('uz', _("Uzbek")),
+    ('ru', _("Russian")),
+    ('krill', _("Krill")),
+]
 
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'uz'
+STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SPECTACULAR_SETTINGS = {

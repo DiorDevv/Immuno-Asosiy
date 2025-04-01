@@ -1,17 +1,19 @@
+import logging
 from datetime import date
 import openpyxl
 from rest_framework import status, serializers
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.db import transaction
 
+logger = logging.getLogger(__name__)
 from dori.models import TavsiyaEtilganDori
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor, DoriBerish
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor, DoriBerish, ArxivBemor, ArxivSababi, Viloyat
 from rest_framework.permissions import AllowAny
-
+from django.db import IntegrityError
 from .permissions import BemorPermission
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
-    BemorSerializer, TavsiyaEtilganDoriiSerializer
+    BemorSerializer, TavsiyaEtilganDoriiSerializer, ViloyatSerializer
 from rest_framework import permissions
 from rest_framework import viewsets, filters
 from rest_framework.exceptions import ValidationError
@@ -73,6 +75,16 @@ class ManzilViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Faqat kirgan user POST, PUT, DELETE qila oladi
 
 
+class ViloyatViewSet(viewsets.ModelViewSet):
+    queryset = Viloyat.objects.all()
+    serializers = ViloyatSerializer
+    permission_classes = []
+
+    def get_serializer_class(self):
+        if self.action == 'list':  # Agar foydalanuvchi GET so‘rovi yuborsa
+            return ViloyatSerializer
+
+
 class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
     queryset = OperatsiyaBolganJoy.objects.all()
     serializer_class = OperatsiyaBolganJoySerializer
@@ -128,6 +140,43 @@ class BemorViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": f"Server xatosi: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def destroy(self, request, *args, **kwargs):
+        """Bemorni o‘chirishdan oldin arxivga saqlaydi"""
+        instance = self.get_object()
+
+        # So‘rovdan `arxiv_sababi` va `qoshimcha_malumotlar`ni olish
+        arxiv_sababi_id = request.data.get("arxiv_sababi")
+        qoshimcha_malumotlar = request.data.get("qoshimcha_malumotlar", "")
+
+        if not arxiv_sababi_id:
+            return Response({"error": "Arxiv sababi kerak!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            arxiv_sababi = ArxivSababi.objects.get(id=arxiv_sababi_id)
+        except ArxivSababi.DoesNotExist:
+            return Response({"error": "Noto‘g‘ri arxiv sababi ID!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            with transaction.atomic():
+                # ✅ **Bemorni arxivga saqlaymiz**
+                arxiv_bemor = ArxivBemor.objects.create(
+                    bemor=instance,
+                    arxiv_sababi=arxiv_sababi,
+                    qoshimcha_malumotlar=qoshimcha_malumotlar,
+                )
+                logger.info(f"✅ Bemor arxivga saqlandi: {arxiv_bemor.id}")
+
+                # ✅ **Bemorni o‘chiramiz**
+                instance.delete()
+                logger.info(f"✅ Bemor o‘chirildi: {instance.id}")
+
+            return Response({"message": "Bemor arxivga saqlandi va o‘chirildi"}, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            logger.error(f"❌ Xato: {str(e)}")
+            return Response({"error": "Bemor arxivga saqlanmadi!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"message": "Bemor arxivga saqlandi va o‘chirildi"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class ExportBemorExcelView(View):

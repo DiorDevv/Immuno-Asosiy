@@ -72,17 +72,28 @@ class BemorQoshsihAdmin(admin.ModelAdmin):
 
 @admin.register(ArxivSababi)
 class ArxivSababiAdmin(admin.ModelAdmin):
-    list_display = ["nomi"]
+    list_display = ("nomi",)
+    search_fields = ("nomi",)
+
+
+@admin.register(ArxivBemor)
+class ArxivBemorAdmin(admin.ModelAdmin):
+    list_display = ("bemor", "arxiv_sababi", "qoshimcha_malumotlar")
+    list_filter = ("arxiv_sababi",)
+    search_fields = ("bemor__ism", "bemor__familiya", "bemor__JSHSHIR")
+    ordering = ("-qoshimcha_malumotlar",)
+    readonly_fields = ("qoshimcha_malumotlar",)  # ❌ `updated_at` o‘chirildi
+    autocomplete_fields = ("bemor", "arxiv_sababi")  # ✅ TO‘G‘RI
 
 
 @admin.register(Bemor)
 class BemorAdmin(ExportMixin, admin.ModelAdmin):
-    list_display = ('id', "bemor", "manzil", "bemor_holati", "operatsiya_bolgan_joy", "arxivga_olingan_sana")
+    list_display = ('id', "bemor", "manzil", "bemor_holati", "operatsiya_bolgan_joy")
     search_fields = ("bemor__JSHSHIR", "bemor__ism", "bemor__familiya")
-    list_filter = ("bemor__jinsi", "bemor_holati", "arxivga_olingan_sana")
-    date_hierarchy = "arxivga_olingan_sana"
+    list_filter = ("bemor__jinsi", "bemor_holati",)
+    # date_hierarchy = "arxivga_olingan_sana"
     autocomplete_fields = ("bemor", "manzil", "bemor_holati", "operatsiya_bolgan_joy")
-    ordering = ("arxivga_olingan_sana",)
+    # ordering = ("arxivga_olingan_sana",)
     list_per_page = 20
     fieldsets = (
         ("Bemor ma’lumotlari", {
@@ -92,12 +103,12 @@ class BemorAdmin(ExportMixin, admin.ModelAdmin):
             "fields": ("manzil", "bemor_holati", "operatsiya_bolgan_joy", "qoshimcha_malumotlar"),
             "classes": ("collapse",)
         }),
-        ("Arxiv", {
-            "fields": ("arxivga_olingan_sana", "biriktirilgan_file"),
-            "classes": ("collapse",)
-        }),
+        # ("Arxiv", {
+        #     "fields": ("arxivga_olingan_sana", "biriktirilgan_file"),
+        #     "classes": ("collapse",)
+        # }),
     )
-    readonly_fields = ("arxivga_olingan_sana",)
+    # readonly_fields = ("arxivga_olingan_sana",)
 
 
 @admin.register(DoriBerish)

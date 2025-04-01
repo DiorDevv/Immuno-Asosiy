@@ -2,7 +2,8 @@ from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 
 from dori.models import TavsiyaEtilganDori, MedicationType, Medication
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman, DoriBerish
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman, DoriBerish, \
+    ArxivBemor
 import re
 from django.utils import timezone
 import os
@@ -10,6 +11,7 @@ from .permissions import BemorPermission
 
 
 class ViloyatSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Viloyat
         fields = "__all__"
@@ -95,6 +97,32 @@ class BemorningHolatiSerializer(serializers.ModelSerializer):
     class Meta:
         model = BemorningHolati
         fields = '__all__'
+
+
+class ArxivSerializer(serializers.ModelSerializer):
+    bemor = BemorQoshishSerializer()  # Bemor ma'lumotlarini ham ko‘rsatish
+    sabab = serializers.StringRelatedField(source="arxiv_sababi")
+
+    class Meta:
+        model = ArxivBemor
+        fields = "__all__"
+
+    # def delete(self, instance, validated_data):
+    #     """Bemorni o‘chirishdan oldin arxivga saqlash"""
+    #     arxiv_sababi = validated_data.get("arxiv_sababi")
+    #     qoshimcha_malumot = validated_data.get("qoshimcha_malumot", "")
+    #
+    #     if not arxiv_sababi:
+    #         raise serializers.ValidationError({"error": "Arxiv sababi kerak!"})
+    #
+    #     # ✅ Bemorni arxivga qo‘shamiz
+    #     ArxivBemor.objects.create(
+    #         bemor=instance,
+    #         arxiv_sababi=arxiv_sababi,
+    #     )
+    #
+    #     # ✅ Bemorni o‘chirib tashlaymiz
+    #     instance.delete()
 
 
 class BemorSerializer(serializers.ModelSerializer):
