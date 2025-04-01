@@ -3,7 +3,6 @@ from django.db.models import TextChoices
 from django.utils import timezone
 
 
-
 class TransplantCenter(models.Model): #Muassasa nomi
     name = models.CharField(max_length=255)
 
