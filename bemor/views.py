@@ -35,6 +35,7 @@ class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
     serializer_class = BemorQoshishSerializer
     permission_classes = [BemorPermission, ]
+    pagination_class = CustomPagination
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -75,12 +76,14 @@ class ManzilViewSet(viewsets.ModelViewSet):
     queryset = Manzil.objects.all()
     serializer_class = ManzilSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Faqat kirgan user POST, PUT, DELETE qila oladi
+    pagination_class = CustomPagination
 
 
 class ViloyatViewSet(viewsets.ModelViewSet):
     queryset = Viloyat.objects.all()
     serializers = ViloyatSerializer
     permission_classes = []
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action == 'list':  # Agar foydalanuvchi GET so‘rovi yuborsa
@@ -90,6 +93,7 @@ class ViloyatViewSet(viewsets.ModelViewSet):
 class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
     queryset = OperatsiyaBolganJoy.objects.all()
     serializer_class = OperatsiyaBolganJoySerializer
+    pagination_class = CustomPagination
 
     def perform_create(self, serializer):
         # Qo‘shimcha tekshiruv: operatsiya sanasi tugash sanasidan oldin bo‘lishi kerak
@@ -242,6 +246,7 @@ class ExportBemorExcelView(View):
 
 class BemorHolatiStatistika(APIView):
     permission_classes = []
+    pagination_class = CustomPagination
 
     def get(self, request):
         # Holatlar bo‘yicha statistika
@@ -276,3 +281,4 @@ class TavsiyaEtilganDoriViewSet(viewsets.ModelViewSet):
     queryset = TavsiyaEtilganDori.objects.all().select_related('dori_turi', 'dori_nomi')
     serializer_class = TavsiyaEtilganDoriiSerializer
     permission_classes = []
+    pagination_class = CustomPagination
