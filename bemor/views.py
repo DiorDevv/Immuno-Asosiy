@@ -6,6 +6,8 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from django.db import transaction
 
+from shared.cumtom_pagination import CustomPagination
+
 logger = logging.getLogger(__name__)
 from dori.models import TavsiyaEtilganDori
 from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor, DoriBerish, ArxivBemor, ArxivSababi, Viloyat
@@ -108,6 +110,7 @@ class BemorViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']
     ordering_fields = ['created_at', 'arxivga_olingan_sana']
+    pagination_class = CustomPagination
 
     def create(self, request, *args, **kwargs):
         try:
