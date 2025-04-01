@@ -4,19 +4,20 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from .models import *
+from .permissions import ArizaPermission
 from .serializers import *
 
 
 class TransplantCenterViewSet(viewsets.ModelViewSet):
     queryset = TransplantCenter.objects.all()
     serializer_class = TransplantCenterSerializer
-    permission_classes = []
+    permission_classes = [ArizaPermission,]
 
 
 class ToWhomViewSet(viewsets.ModelViewSet):
     queryset = ToWhom.objects.all()
     serializer_class = ToWhomSerializer
-    permission_classes = []
+    permission_classes = [ArizaPermission,]
 
 class ApplicationStatusViewSet(viewsets.ModelViewSet):
     queryset = ApplicationStatus.objects.all()
@@ -26,21 +27,21 @@ class ApplicationStatusViewSet(viewsets.ModelViewSet):
 class MedicationTypeAppViewSet(viewsets.ModelViewSet):
     queryset = MedicationType.objects.all()
     serializer_class = MedicationTypeAppSerializer
-    permission_classes = []
+    permission_classes = [ArizaPermission, ]
 
 class MedicationAppViewSet(viewsets.ModelViewSet):
     queryset = MedicationApp.objects.all()
     serializer_class = MedicationAppSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['medication_type']
-    permission_classes = []
+    permission_classes = [ArizaPermission, ]
 
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = Application.objects.all().order_by('-date')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['status', 'to_center', 'position']
     search_fields = ['director_name', 'main_center', 'subject']
-    permission_classes = []
+    permission_classes = [Application,]
 
     def get_serializer_class(self):
         if self.action == 'list':
