@@ -9,10 +9,12 @@ from shared.models import BaseModel
 
 NEW, DONE = ('new', 'done',)
 
+
 class Role(models.TextChoices):
     TTB = "TTB", "TTB"
     VSSB = "VSSB", "VSSB"
     UZMED = "UZMED", "UZMED"
+    BOSH_M = "BOSH_M", "BOSH_M"
     VAZIR = "Vazir", "Vazir"
     VRACH = "VRACH", "VRACH"
 
@@ -35,7 +37,6 @@ class CustomUser(AbstractUser, BaseModel):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     @property
     def full_name(self):
@@ -73,7 +74,3 @@ class CustomUser(AbstractUser, BaseModel):
             self.check_pass()
             self.hashing_password()
         super().save(*args, **kwargs)
-
-
-
-

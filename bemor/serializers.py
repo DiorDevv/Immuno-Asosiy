@@ -1,17 +1,13 @@
 from rest_framework import serializers
-from rest_framework.permissions import IsAuthenticated
 
-from dori.models import TavsiyaEtilganDori, MedicationType, Medication
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman, DoriBerish, \
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, BemorningHolati, Bemor, Viloyat, Tuman, \
     ArxivBemor
 import re
 from django.utils import timezone
 import os
-from .permissions import BemorPermission
 
 
 class ViloyatSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Viloyat
         fields = "__all__"
@@ -99,31 +95,6 @@ class BemorningHolatiSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ArxivSerializer(serializers.ModelSerializer):
-    bemor = BemorQoshishSerializer()  # Bemor ma'lumotlarini ham ko‘rsatish
-    sabab = serializers.StringRelatedField(source="arxiv_sababi")
-
-    class Meta:
-        model = ArxivBemor
-        fields = "__all__"
-
-    # def delete(self, instance, validated_data):
-    #     """Bemorni o‘chirishdan oldin arxivga saqlash"""
-    #     arxiv_sababi = validated_data.get("arxiv_sababi")
-    #     qoshimcha_malumot = validated_data.get("qoshimcha_malumot", "")
-    #
-    #     if not arxiv_sababi:
-    #         raise serializers.ValidationError({"error": "Arxiv sababi kerak!"})
-    #
-    #     # ✅ Bemorni arxivga qo‘shamiz
-    #     ArxivBemor.objects.create(
-    #         bemor=instance,
-    #         arxiv_sababi=arxiv_sababi,
-    #     )
-    #
-    #     # ✅ Bemorni o‘chirib tashlaymiz
-    #     instance.delete()
-
 
 class BemorSerializer(serializers.ModelSerializer):
     # ID larni faqat yozish uchun ishlatamiz (write_only=True)
@@ -167,14 +138,6 @@ class BemorSerializer(serializers.ModelSerializer):
             }
         return data
 
-    def validate_arxivga_olingan_sana(self, value):
-        if value:
-            if value > timezone.now():
-                raise serializers.ValidationError("Arxivga olish sanasi kelajakdagi sana bo‘lishi mumkin emas!")
-            if self.instance and value < self.instance.created_at:
-                raise serializers.ValidationError(
-                    "Arxivga olish sanasi bemor yaratilgan sanadan oldin bo‘lishi mumkin emas!")
-        return value
 
     def validate_biriktirilgan_file(self, value):
         if value:
@@ -199,24 +162,9 @@ class BemorSerializer(serializers.ModelSerializer):
         return data
 
 
-class TavsiyaEtilganDoriiSerializer(serializers.ModelSerializer):
-    dori_turi = serializers.PrimaryKeyRelatedField(queryset=MedicationType.objects.all(), required=True)
-    dori_nomi = serializers.PrimaryKeyRelatedField(queryset=Medication.objects.all(), required=True)
+class ArxivSerializer(serializers.ModelSerializer):
+    bemor = BemorSerializer()  # Bemor ma'lumotlarini ham ko‘rsatish
 
     class Meta:
-        model = TavsiyaEtilganDori
-        fields = '__all__'
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['dori_turi'] = {
-            "id": instance.dori_turi.id,
-            "name": instance.dori_turi.name
-        } if instance.dori_turi else None
-
-        representation['dori_nomi'] = {
-            "id": instance.dori_nomi.id,
-            "name": instance.dori_nomi.name
-        } if instance.dori_nomi else None
-
-        return representation
+        model = ArxivBemor
+        fields = "__all__"
