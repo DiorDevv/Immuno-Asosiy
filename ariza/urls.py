@@ -5,7 +5,7 @@ from .views import *
 router = DefaultRouter()
 router.register(r'centers', TransplantCenterViewSet)
 router.register(r'positions', ToWhomViewSet)
-router.register(r'statuses', ApplicationStatusViewSet)
+# router.register(r'statuses', ApplicationStatusViewSet)
 router.register(r'medication-types', MedicationTypeAppViewSet)
 router.register(r'medications', MedicationAppViewSet)
 router.register(r'applications', ApplicationViewSet)

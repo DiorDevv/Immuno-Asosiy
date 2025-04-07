@@ -10,7 +10,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from datetime import datetime
 from django.utils.timezone import make_aware
-from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, Notification, Attachment
+from .models import MedicationType, Medication, InventoryTransaction, Bemor, MedicationDetails, Notification, \
+    Attachment, CustomPagination
+from .permissions import DoriPermission
 from .serializers import (
     MedicationTypeSerializer,
     MedicationSerializer,
@@ -33,7 +35,7 @@ from .serializers import QabulQilishYakuniySerializer
 class MedicationTypeViewSet(viewsets.ModelViewSet):
     queryset = MedicationType.objects.all()
     serializer_class = MedicationTypeSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [DoriPermission,]
 
     # Limit to only GET and POST methods
     http_method_names = ['get', 'post']
@@ -42,7 +44,7 @@ class MedicationTypeViewSet(viewsets.ModelViewSet):
 class MedicationViewSet(viewsets.ModelViewSet):
     queryset = Medication.objects.all()
     filter_backends = [filters.SearchFilter]
-    permission_classes = [AllowAny]
+    permission_classes = [DoriPermission,]
     search_fields = ['name', 'type__name']
 
     # Limit to only GET and POST methods
@@ -84,7 +86,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     queryset = Bemor.objects.all()
     serializer_class = BemorSerializer
     filter_backends = [filters.SearchFilter]
-    permission_classes = [AllowAny]
+    permission_classes = [DoriPermission,]
     search_fields = ['first_name', 'last_name', 'patient_id']
 
     # Limit to only GET and POST methods
@@ -129,7 +131,8 @@ class PatientViewSet(viewsets.ModelViewSet):
 class InventoryTransactionViewSet(viewsets.ModelViewSet):
     serializer_class = InventoryTransactionSerializer
     filter_backends = [filters.SearchFilter]
-    permission_classes = [AllowAny]
+    permission_classes = [DoriPermission,]
+    pagination_class = CustomPagination
     search_fields = ['medication__name', 'medication__type__name', 'notes',
                      'patient__first_name', 'patient__last_name']
 
@@ -160,8 +163,8 @@ class InventoryTransactionViewSet(viewsets.ModelViewSet):
 class DoriQabulQilishViewSet(viewsets.ModelViewSet):
     queryset = QabulQilishYakuniy.objects.all()
     serializer_class = QabulQilishYakuniySerializer
-    permission_classes = [AllowAny]
-
+    permission_classes = [DoriPermission,]
+    pagination_class = CustomPagination
     # Limit to GET and POST methods
     http_method_names = ['get', 'post']
 
@@ -172,7 +175,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
     filterset_fields = ['status', 'notification_type']
     search_fields = ['message', 'medication__name']
     ordering_fields = ['created_at', 'status']
-    permission_classes = [AllowAny]
+    permission_classes = [DoriPermission,]
+    pagination_class = CustomPagination
 
     # Limit to only GET and POST methods
     http_method_names = ['get', 'post']
@@ -187,7 +191,7 @@ class AttachmentViewSet(viewsets.ModelViewSet):
     """API endpoint for file attachments"""
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [DoriPermission,]
     parser_classes = (MultiPartParser, FormParser)
 
     # Limit to only GET and POST methods
@@ -196,7 +200,21 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 class MedicationPrescriptionDetailView(RetrieveUpdateDestroyAPIView):
     queryset = MedicationPrescription.objects.all()
     serializer_class = MedicationPrescriptionSerializer
-    permission_classes = []
+    permission_classes = [DoriPermission,]
+
+class PrescribedMedicationListCreateView(ListAPIView):
+    queryset = TavsiyaEtilganDori.objects.all()
+    serializer_class = TavsiyaEtilganDoriModelSerializer
+    permission_classes = [DoriPermission,]
+    pagination_class = CustomPagination
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # class MedicationTypeViewSet(viewsets.ModelViewSet):
 #     queryset = MedicationType.objects.all()
@@ -418,18 +436,7 @@ class MedicationPrescriptionDetailView(RetrieveUpdateDestroyAPIView):
 #     permission_classes = []
 #
 #
-class PrescribedMedicationListCreateView(ListAPIView):
-    queryset = TavsiyaEtilganDori.objects.all()
-    serializer_class = TavsiyaEtilganDoriModelSerializer
-    permission_classes = []
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
 #
 # class PrescribedMedicationDetailView(RetrieveUpdateDestroyAPIView):
 #     queryset = PrescribedMedication.objects.all()

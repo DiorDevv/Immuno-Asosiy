@@ -70,12 +70,12 @@ class ApplicationAdmin(admin.ModelAdmin):
         }
 
         # Default color if status name is not in the dictionary
-        color = status_colors.get(obj.status.type, 'gray')
+        color = status_colors.get(obj.status, 'gray')
 
         return format_html(
             '<span style="color: {};">{}</span>',
             color,
-            obj.status.type
+            obj.status
         )
 
     status_colored.short_description = 'Status'
@@ -99,10 +99,10 @@ class ToWhomAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(ApplicationStatus)
-class ApplicationStatusAdmin(admin.ModelAdmin):
-    list_display = 'type',
-    search_fields = 'type',
+# @admin.register(ApplicationStatus)
+# class ApplicationStatusAdmin(admin.ModelAdmin):
+#     list_display = 'status',
+#     search_fields = 'status',
 
 
 @admin.register(ApplicationMedication)

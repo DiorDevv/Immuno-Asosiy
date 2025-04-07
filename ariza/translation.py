@@ -9,24 +9,24 @@ class ArizaTranslation(TranslationOptions):
 
 @register(ToWhom)
 class ToWhomTranslation(TranslationOptions):
-    fields = ['name']
-
-@register(ApplicationStatus)
-class ApplicationStatusTranslation(TranslationOptions):
-    fields = ['type']
+    fields = ('name',)
+#
+# @register(ApplicationStatus)
+# class ApplicationStatusTranslation(TranslationOptions):
+#     fields =('status',)
 
 @register(MedicationTypeApp)
 class MedicationTypeAppTranslation(TranslationOptions):
-    fields = ['name']
+    fields = ('name',)
 
 @register(MedicationApp)
 class MedicationAppTranslation(TranslationOptions):
-    fields = ['name']
+    fields = ('name',)
 
 @register(Application)
 class ApplicationTranslation(TranslationOptions):
-    fields = ['director_name', 'position']
+    fields = ('director_name', 'position')
 
 @register(ApplicationMedication)
 class ApplicationMedicationTranslation(TranslationOptions):
-    fields = ['dosage']
+    fields = ('dosage',)

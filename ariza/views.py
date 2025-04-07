@@ -3,7 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from .models import *
+
+from dori.models import CustomPagination
 from .permissions import ArizaPermission
 from .serializers import *
 
@@ -19,10 +20,10 @@ class ToWhomViewSet(viewsets.ModelViewSet):
     serializer_class = ToWhomSerializer
     permission_classes = [ArizaPermission,]
 
-class ApplicationStatusViewSet(viewsets.ModelViewSet):
-    queryset = ApplicationStatus.objects.all()
-    serializer_class = ApplicationStatusSerializer
-    permission_classes = []
+# class ApplicationStatusViewSet(viewsets.ModelViewSet):
+#     queryset = ApplicationStatus.objects.all()
+#     serializer_class = ApplicationStatusSerializer
+#     permission_classes = []
 
 class MedicationTypeAppViewSet(viewsets.ModelViewSet):
     queryset = MedicationType.objects.all()
@@ -41,7 +42,8 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['status', 'to_center', 'position']
     search_fields = ['director_name', 'main_center', 'subject']
-    permission_classes = [Application,]
+    permission_classes = [ArizaPermission,]
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -71,3 +73,5 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             application.save()
             return Response({'status': 'Status updated'}, status=status.HTTP_200_OK)
         return Response({'error': 'Status ID required'}, status=status.HTTP_400_BAD_REQUEST)
+
+
