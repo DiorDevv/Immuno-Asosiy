@@ -147,9 +147,7 @@ class BemorViewSet(viewsets.ModelViewSet):
             return Response({"error": f"Server xatosi: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):
-        """
-        Bemorni o‘chirishdan oldin arxivga qo‘shish.
-        """
+
         try:
             bemor_id = kwargs.get('pk')
             if not bemor_id:

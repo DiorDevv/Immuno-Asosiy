@@ -124,12 +124,14 @@ class BemorSerializer(serializers.ModelSerializer):
             return {
                 "id": instance.id,  # Nechanchi bemor bo‘lib qo‘shilgani
                 "bemor": data.get('bemor_detail'),
-                "bemor_holati": data.get('bemor_holati_detail')
+                "bemor_holati": data.get('bemor_holati_detail'),
+                "manzil": data.get('manzil_detail'),
             }
         elif request and request.parser_context['kwargs'].get('pk'):
             # Detail (ID bilan)
             data['bemor'] = data.pop('bemor_detail', None)
             data['bemor_holati'] = data.pop('bemor_holati_detail', None)
+
         else:
             # List (ID'siz faqat `bemor` va `bemor_holati`)
             data = {
