@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import TextChoices
-from django.utils import timezone
+
+from users.models import Role
 
 
 class TransplantCenter(models.Model): #Muassasa nomi
@@ -26,20 +27,15 @@ class ToWhom(models.Model): #Kimga jo'natilishi
         return self.name
 
 
-class ApplicationStatus(models.Model): # Ariza Statusi
-    class StatusType(TextChoices):
-        RECEIVED = 'Received', 'received'
-        CANCELED = 'Canceled', 'canceled'
-        PENDING = 'Pending', 'pending'
-        UNANSWERED = 'Unanswered', 'unanswered'
-    type = models.CharField(max_length=255, choices=StatusType.choices)
+class ApplicationStatus(models.TextChoices):
+    RECEIVED = 'Received', 'Qabul qilindi'
+    CANCELED = 'Canceled', 'Qaytarildi'
+    PENDING = 'Pending', 'Jarayonda'
+    UNANSWERED = 'Unanswered', 'Javob berilmadi'
 
-    class Meta:
-        verbose_name = "Status"
-        verbose_name_plural = "Status"
 
-    def __str__(self):
-        return self.type
+
+
 
 
 class MedicationTypeApp(models.Model):
@@ -57,16 +53,24 @@ class MedicationApp(models.Model):
         return self.name
 
 
+
 class Application(models.Model): # Ariza
-    director_name = models.CharField(max_length=255)
-    to_center = models.ForeignKey(TransplantCenter, on_delete=models.CASCADE, related_name='received_applications')
-    position = models.ForeignKey(ToWhom, on_delete=models.CASCADE)
+    director_name = models.CharField(max_length=255, null=True, blank=True)
+    to_center = models.ForeignKey("TransplantCenter", on_delete=models.CASCADE, related_name='received_applications', null=True, blank=True)
+    position = models.ForeignKey("ToWhom", on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateField()
-    status = models.ForeignKey(ApplicationStatus, on_delete=models.CASCADE, related_name='aplication')
+    status = models.CharField(
+        max_length=20,
+        choices=ApplicationStatus.choices,  # ✅ To‘g‘ri usul
+        default=ApplicationStatus.PENDING,
+        null=True, blank=True
+    )
+    current_role = models.CharField(max_length=20, choices=Role.choices,
+                                    default=Role.VRACH, null=True, blank=True)  # Default: Vrach
     # main_center = models.CharField(max_length=255, blank=True, null=True)
     # start_date = models.DateField(null=True, blank=True)
     # end_date = models.DateField(null=True, blank=True)
-    patient_count = models.IntegerField(default=0)
+    patient_count = models.IntegerField(default=0, null=True, blank=True)
     # subject = models.CharField(max_length=255, blank=True, null=True)
     # attachment = models.FileField(upload_to='applications/', null=True, blank=True,
     #                               max_length=5 * 1024 * 1024)  # 5MB limit
@@ -78,6 +82,31 @@ class Application(models.Model): # Ariza
 
     def __str__(self):
         return f"Application {self.id} - {self.director_name}"
+
+    def approve(self):
+        """Arizani keyingi bosqichga o'tkazish"""
+        role_sequence = [Role.VRACH, Role.TTB, Role.VSSB, Role.UZMED, Role.VAZIR]
+
+        if self.status == ApplicationStatus.CANCELED:
+            return "Bu ariza rad etilgan."
+
+        if self.current_role == Role.VAZIR:
+            return "Ariza allaqachon yakunlangan."
+
+        next_role_index = role_sequence.index(self.current_role) + 1
+        if next_role_index < len(role_sequence):
+            self.current_role = role_sequence[next_role_index]
+            self.status = ApplicationStatus.UNANSWERED  # Har safar yangi rolga o'tganda, status yana "Javob berilmadi" bo'ladi.
+            self.save()
+            return f"Ariza {self.current_role} ga yuborildi."
+
+        return "Ariza jarayoni yakunlandi."
+
+    def reject(self):
+        """Arizani rad qilish"""
+        self.status = ApplicationStatus.CANCELED
+        self.save()
+        return "Ariza rad qilindi."
 
 
 class ApplicationMedication(models.Model): # Dori uchun ariza

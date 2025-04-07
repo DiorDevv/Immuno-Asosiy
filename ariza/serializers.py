@@ -15,10 +15,10 @@ class ToWhomSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ApplicationStatusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ApplicationStatus
-        fields = '__all__'
+# class ApplicationStatusSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ApplicationStatus
+#         fields = '__all__'
 
 
 class MedicationTypeAppSerializer(serializers.ModelSerializer):

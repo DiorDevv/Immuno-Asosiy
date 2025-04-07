@@ -1,19 +1,34 @@
-from datetime import timedelta
-from email.policy import default
-
 from django.db import models
 from django.db.models import Sum, CASCADE
 from django.utils import timezone
-
+from django.db import models
+from django.db.models import Sum
 from bemor.models import Bemor
 from shared.models import BaseModel
 
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 2
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+    def get_paginated_response(self, data):
+        return Response(
+            {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link(),
+                'count': self.page.paginator.count,
+                'results': data,
+            }
+        )
 
 class MedicationType(BaseModel):
     name = models.CharField(max_length=100, unique=True)
 
     class Meta:
-
         verbose_name = "Dori Turi"
         verbose_name_plural = "Dori Turlari"
 
@@ -21,8 +36,7 @@ class MedicationType(BaseModel):
         return self.name
 
 
-from django.db import models
-from django.db.models import Sum
+
 
 class Medication(BaseModel):
     type = models.ForeignKey(

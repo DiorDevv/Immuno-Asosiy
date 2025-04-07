@@ -1,14 +1,14 @@
 from rest_framework.permissions import BasePermission
 from users.models import Role  # Role modelingizni import qiling
 
-class BemorPermission(BasePermission):
+class DoriPermission(BasePermission):
     """
     Faqat VRACH ro‘liga ega foydalanuvchilar CRUD (Create, Update, Delete) amallarini bajarishi mumkin.
     Boshqa foydalanuvchilar faqat GET (Read) imkoniyatiga ega bo‘ladi.
     """
 
     def has_permission(self, request, view):
-        user = request.user
+        user  = request.user
 
         # Foydalanuvchi autentifikatsiya qilinganmi?
         if not user or not user.is_authenticated:
