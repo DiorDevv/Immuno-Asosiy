@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import BemorQoshishCreateView, ManzilViewSet, OperatsiyaBolganJoyViewSet, \
-    BemorViewSet, ExportBemorExcelView, BemorHolatiStatistika, BemorPDFDownloadView, TavsiyaEtilganDoriViewSet, \
+    BemorViewSet, ExportBemorExcelView, BemorHolatiStatistika, BemorPDFDownloadView, \
     ViloyatViewSet
 
 # ViewSet-lar uchun Router yaratamiz
@@ -10,7 +10,6 @@ router.register(r'manzil', ManzilViewSet, basename='manzil')
 
 router.register(r'operatsiyalar', OperatsiyaBolganJoyViewSet)
 router.register(r'bemorlar', BemorViewSet, basename='bemorlar')
-router.register(r'dori-berish', TavsiyaEtilganDoriViewSet, basename='dori-berish'),
 router.register(r'viloyat', ViloyatViewSet, basename='viloyat')
 
 urlpatterns = [

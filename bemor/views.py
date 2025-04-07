@@ -6,21 +6,21 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from django.db import transaction
 
+from shared.cumtom_pagination import CustomPagination
+
 logger = logging.getLogger(__name__)
 from dori.models import TavsiyaEtilganDori
-from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor, DoriBerish, ArxivBemor, ArxivSababi, Viloyat
+from .models import BemorQoshish, Manzil, OperatsiyaBolganJoy, Bemor, ArxivBemor, Viloyat
 from rest_framework.permissions import AllowAny
 from django.db import IntegrityError
 from .permissions import BemorPermission
 from .serializers import BemorQoshishSerializer, ManzilSerializer, OperatsiyaBolganJoySerializer, \
-    BemorSerializer, TavsiyaEtilganDoriiSerializer, ViloyatSerializer
+    BemorSerializer, ViloyatSerializer, ArxivSerializer
 from rest_framework import permissions
 from rest_framework import viewsets, filters
 from rest_framework.exceptions import ValidationError
 from openpyxl.styles import Alignment
-# import csv
 from django.db.models import Count, F, Value
-from django.http import HttpResponse
 from django.views import View
 from django.db.models.functions import Coalesce
 
@@ -33,6 +33,7 @@ class BemorQoshishCreateView(CreateAPIView):
     queryset = BemorQoshish.objects.all()
     serializer_class = BemorQoshishSerializer
     permission_classes = [BemorPermission, ]
+    pagination_class = CustomPagination
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -73,12 +74,14 @@ class ManzilViewSet(viewsets.ModelViewSet):
     queryset = Manzil.objects.all()
     serializer_class = ManzilSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Faqat kirgan user POST, PUT, DELETE qila oladi
+    pagination_class = CustomPagination
 
 
 class ViloyatViewSet(viewsets.ModelViewSet):
     queryset = Viloyat.objects.all()
     serializers = ViloyatSerializer
     permission_classes = []
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action == 'list':  # Agar foydalanuvchi GET so‘rovi yuborsa
@@ -88,6 +91,7 @@ class ViloyatViewSet(viewsets.ModelViewSet):
 class OperatsiyaBolganJoyViewSet(viewsets.ModelViewSet):
     queryset = OperatsiyaBolganJoy.objects.all()
     serializer_class = OperatsiyaBolganJoySerializer
+    pagination_class = CustomPagination
 
     def perform_create(self, serializer):
         # Qo‘shimcha tekshiruv: operatsiya sanasi tugash sanasidan oldin bo‘lishi kerak
@@ -108,6 +112,7 @@ class BemorViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['bemor__ism', 'bemor__familiya', 'bemor__JSHSHIR']
     ordering_fields = ['created_at', 'arxivga_olingan_sana']
+    pagination_class = CustomPagination
 
     def create(self, request, *args, **kwargs):
         try:
@@ -142,41 +147,48 @@ class BemorViewSet(viewsets.ModelViewSet):
             return Response({"error": f"Server xatosi: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):
-        """Bemorni o‘chirishdan oldin arxivga saqlaydi"""
-        instance = self.get_object()
-
-        # So‘rovdan `arxiv_sababi` va `qoshimcha_malumotlar`ni olish
-        arxiv_sababi_id = request.data.get("arxiv_sababi")
-        qoshimcha_malumotlar = request.data.get("qoshimcha_malumotlar", "")
-
-        if not arxiv_sababi_id:
-            return Response({"error": "Arxiv sababi kerak!"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            arxiv_sababi = ArxivSababi.objects.get(id=arxiv_sababi_id)
-        except ArxivSababi.DoesNotExist:
-            return Response({"error": "Noto‘g‘ri arxiv sababi ID!"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            with transaction.atomic():
-                # ✅ **Bemorni arxivga saqlaymiz**
-                arxiv_bemor = ArxivBemor.objects.create(
-                    bemor=instance,
-                    arxiv_sababi=arxiv_sababi,
-                    qoshimcha_malumotlar=qoshimcha_malumotlar,
+            bemor_id = kwargs.get('pk')
+            if not bemor_id:
+                return Response(
+                    {"error": "Bemor ID kiritilishi shart!"},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-                logger.info(f"✅ Bemor arxivga saqlandi: {arxiv_bemor.id}")
 
-                # ✅ **Bemorni o‘chiramiz**
-                instance.delete()
-                logger.info(f"✅ Bemor o‘chirildi: {instance.id}")
+            with transaction.atomic():
+                bemor = Bemor.objects.get(id=bemor_id)
 
-            return Response({"message": "Bemor arxivga saqlandi va o‘chirildi"}, status=status.HTTP_204_NO_CONTENT)
+                # Arxivga bemor nusxasini qo‘shish
+                arxiv_bemor = ArxivBemor.objects.create(
+                    bemor=bemor,
+                    qoshimcha_malumotlar=bemor.qoshimcha_malumotlar,
+                )
 
+
+                # ⚠️ Muhim: Arxivga yozilgach, bemorni o‘chirish
+                bemor.delete()
+
+                arxiv_bemor_data = ArxivSerializer(arxiv_bemor).data
+
+                return Response(
+                    {
+                        "message": "Bemor arxivga o‘tkazildi va ro‘yxatdan o‘chirildi.",
+                        "arxiv_bemor": arxiv_bemor_data
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+        except Bemor.DoesNotExist:
+            return Response(
+                {"error": "Bunday bemor mavjud emas!"},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
-            logger.error(f"❌ Xato: {str(e)}")
-            return Response({"error": "Bemor arxivga saqlanmadi!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({"message": "Bemor arxivga saqlandi va o‘chirildi"}, status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {"error": f"Xatolik yuz berdi: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ExportBemorExcelView(View):
@@ -239,6 +251,7 @@ class ExportBemorExcelView(View):
 
 class BemorHolatiStatistika(APIView):
     permission_classes = []
+    pagination_class = CustomPagination
 
     def get(self, request):
         # Holatlar bo‘yicha statistika
@@ -267,9 +280,3 @@ class BemorPDFDownloadView(APIView):
 
     def get(self, request, pk):
         return generate_bemor_pdf(pk)
-
-
-class TavsiyaEtilganDoriViewSet(viewsets.ModelViewSet):
-    queryset = TavsiyaEtilganDori.objects.all().select_related('dori_turi', 'dori_nomi')
-    serializer_class = TavsiyaEtilganDoriiSerializer
-    permission_classes = []
